@@ -1,119 +1,165 @@
-(function() {
-    const log = document.getElementById("telemetryMsg");
-    const btnReset = document.getElementById("btnResetAll");
 
-    // ESCENARIO 1
-    const btnS1Con = document.getElementById("btnS1Con");
-    const barCon = document.getElementById("barCon");
-    const lvlCon = document.getElementById("lvlCon");
-    const wrapperCon = document.getElementById("wrapperCon");
+    const telemetryLog = document.getElementById("telemetryMsg");
+    const btnResetAll = document.getElementById("btnResetAll");
 
-    // ESCENARIO 2
-    const btnS2Con = document.getElementById("btnS2Con");
-    const selectS2Con = document.getElementById("selectS2Con");
-    const totalCon = document.getElementById("totalCon");
+    // Escenario 1: Control de Escala y HUD
+    const btnS1Mvc = document.getElementById("btnS1Mvc");
+    const barMvc = document.getElementById("barMvc");
+    const lvlMvc = document.getElementById("lvlMvc");
+    const wrapperMvc = document.getElementById("wrapperMvc");
 
-    // ESCENARIO 3
-    const contenedorFormCon = document.getElementById("contenedorFormCon");
-    const btnPrevCon = document.getElementById("btnPrevCon");
-    const btnNextCon = document.getElementById("btnNextCon");
-    const btnS3Con = document.getElementById("btnS3Con");
-    const previewCon = document.getElementById("previewCon");
+    // Escenario 2: Conversión Dinámica de Divisas
+    const btnS2Mvc = document.getElementById("btnS2Mvc");
+    const selectS2Mvc = document.getElementById("selectS2Mvc");
+    const totalMvc = document.getElementById("totalMvc");
 
-    const HTML_P1 = `<label class="form-label">Nombre Completo del Usuario:</label>
-                     <input type="text" id="inputNombreCon" name="nombre" class="input" placeholder="Ej. Carlos Mendoza">`;
-    const HTML_P2 = `<label class="form-label">Número Telefónico Corporativo:</label>
-                     <input type="text" id="inputTelCon" name="telefono" class="input" placeholder="Ej. 600112233">`;
+    // Escenario 3: Persistencia de Formulario y Ciclo de Vida
+    const formContainerMvc = document.getElementById("formContainerMvc");
+    const btnPrevMvc = document.getElementById("btnPrevMvc");
+    const btnNextMvc = document.getElementById("btnNextMvc");
+    const btnS3Mvc = document.getElementById("btnS3Mvc");
+    const previewMvc = document.getElementById("previewMvc");
 
-    // MODELO: Estado Blindado en Memoria
-    let AppState = {
+    // Escenario 4: Sincronización Multivista (Carrito de compras)
+    const btnS4AddMvc = document.getElementById("btnS4AddMvc");
+    const btnS4ClearMvc = document.getElementById("btnS4ClearMvc");
+    const cartBadgeMvc = document.getElementById("cartBadgeMvc");
+    const cartListMvc = document.getElementById("cartListMvc");
+    const cartTotalMvc = document.getElementById("cartTotalMvc");
+
+    const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
+                         <input type="text" id="inputNombreMvc" name="nombre" class="input" placeholder="Ej. Carlos Mendoza">`;
+    const HTML_STEP_2 = `<label class="form-label">Número Telefónico Corporativo:</label>
+                         <input type="text" id="inputTelMvc" name="telefono" class="input" placeholder="Ej. 600112233">`;
+
+    // MODELO: Estado centralizado en memoria
+    const appState = {
         s1: { progreso: 0, nivel: 1 },
-        s2: { dineroBaseEuros: 0.0, divisa: "EUR" },
+        s2: { saldoEuros: 0.0, divisa: "EUR" },
         s3: { pasoActual: 1, formulario: { nombre: "", telefono: "" } },
+        s4: { items: [] },
         tasas: { EUR: 1.0, USD: 1.10, JPY: 160.0 }
     };
 
     function resetearEstructura() {
-        AppState.s1 = { progreso: 0, nivel: 1 };
-        AppState.s2 = { dineroBaseEuros: 0.0, divisa: "EUR" };
-        AppState.s3 = { pasoActual: 1, formulario: { nombre: "", telefono: "" } };
-        selectS2Con.value = "EUR";
-        wrapperCon.style.width = "100px";
-        previewCon.innerText = "null";
+        appState.s1 = { progreso: 0, nivel: 1 };
+        appState.s2 = { saldoEuros: 0.0, divisa: "EUR" };
+        appState.s3 = { pasoActual: 1, formulario: { nombre: "", telefono: "" } };
+        appState.s4 = { items: [] };
+        selectS2Mvc.value = "EUR";
+        wrapperMvc.style.width = "100px";
+        previewMvc.innerText = "null";
         renderizar();
     }
 
-    // VISTA: Reflejo Puro de las Variables
+    // VISTA: Renderizado declarativo a partir del estado de la aplicación
     function renderizar() {
-        lvlCon.innerText = AppState.s1.nivel;
-        barCon.style.width = AppState.s1.progreso + "%";
+        // Escenario 1
+        lvlMvc.innerText = appState.s1.nivel;
+        barMvc.style.width = appState.s1.progreso + "%";
 
-        const div = AppState.s2.divisa;
-        const totalNeto = AppState.s2.dineroBaseEuros * AppState.tasas[div];
+        // Escenario 2
+        const divisa = appState.s2.divisa;
+        const saldoCalculado = appState.s2.saldoEuros * appState.tasas[divisa];
         
-        if (div === "EUR") totalCon.innerText = totalNeto.toFixed(2) + "€";
-        if (div === "USD") totalCon.innerText = "$" + totalNeto.toFixed(2);
-        if (div === "JPY") totalCon.innerText = "¥" + Math.floor(totalNeto);
+        if (divisa === "EUR") totalMvc.innerText = saldoCalculado.toFixed(2) + " €";
+        else if (divisa === "USD") totalMvc.innerText = "$ " + saldoCalculado.toFixed(2);
+        else if (divisa === "JPY") totalMvc.innerText = "¥ " + Math.floor(saldoCalculado);
 
-        if (AppState.s3.pasoActual === 1) {
-            contenedorFormCon.innerHTML = HTML_P1;
-            document.getElementById("inputNombreCon").value = AppState.s3.formulario.nombre;
-            btnPrevCon.disabled = true;
-            btnNextCon.disabled = false;
+        // Escenario 3
+        if (appState.s3.pasoActual === 1) {
+            formContainerMvc.innerHTML = HTML_STEP_1;
+            document.getElementById("inputNombreMvc").value = appState.s3.formulario.nombre;
+            btnPrevMvc.disabled = true;
+            btnNextMvc.disabled = false;
         } else {
-            contenedorFormCon.innerHTML = HTML_P2;
-            document.getElementById("inputTelCon").value = AppState.s3.formulario.telefono;
-            btnPrevCon.disabled = false;
-            btnNextCon.disabled = true;
+            formContainerMvc.innerHTML = HTML_STEP_2;
+            document.getElementById("inputTelMvc").value = appState.s3.formulario.telefono;
+            btnPrevMvc.disabled = false;
+            btnNextMvc.disabled = true;
         }
+
+        // Escenario 4
+        cartBadgeMvc.innerText = appState.s4.items.length;
+        if (appState.s4.items.length === 0) {
+            cartListMvc.innerHTML = `<li class="cart-empty">Carrito vacío</li>`;
+        } else {
+            cartListMvc.innerHTML = appState.s4.items.map(item => `
+                <li class="cart-item">
+                    <span>${item.name}</span>
+                    <span class="cart-item-price">$ ${item.price.toFixed(2)}</span>
+                </li>
+            `).join("");
+        }
+        const totalCarrito = appState.s4.items.reduce((sum, item) => sum + item.price, 0);
+        cartTotalMvc.innerText = `$ ${totalCarrito.toFixed(2)}`;
     }
 
-    // CONTROLADOR: Intercepciones Lógicas
-    btnS1Con.addEventListener("click", () => {
-        AppState.s1.progreso += 20;
-        if (AppState.s1.progreso >= 100) {
-            AppState.s1.nivel += 1;
-            AppState.s1.progreso = 0;
-            log.innerText = "[MVC DESACOPLADO]: Datos computados con éxito en memoria. Nivel incrementado.";
+    // CONTROLADOR: Gestores de eventos y lógica de negocio
+    btnS1Mvc.addEventListener("click", () => {
+        appState.s1.progreso += 20;
+        if (appState.s1.progreso >= 100) {
+            appState.s1.nivel += 1;
+            appState.s1.progreso = 0;
+            telemetryLog.innerText = "[MVC DESACOPLADO] Nivel incrementado con éxito en memoria. Estado reiniciado.";
         } else {
-            log.innerText = `[MVC DESACOPLADO]: Progreso registrado en variable interna: ${AppState.s1.progreso}/100`;
+            telemetryLog.innerText = `[MVC DESACOPLADO] Progreso actualizado en memoria: ${appState.s1.progreso}/100`;
         }
         renderizar();
     });
 
-    selectS2Con.addEventListener("change", (e) => {
-        AppState.s2.divisa = e.target.value;
-        log.innerText = "[MVC DESACOPLADO]: Divisa cambiada en el Modelo.";
+    selectS2Mvc.addEventListener("change", (e) => {
+        appState.s2.divisa = e.target.value;
+        telemetryLog.innerText = `[MVC DESACOPLADO] Cambio de divisa registrado en el Modelo a: ${appState.s2.divisa}`;
         renderizar();
     });
 
-    btnS2Con.addEventListener("click", () => {
-        AppState.s2.dineroBaseEuros += 10.00;
+    btnS2Mvc.addEventListener("click", () => {
+        appState.s2.saldoEuros += 10.00;
+        telemetryLog.innerText = `[MVC DESACOPLADO] Saldo incrementado en memoria (+10.00 EUR). Nuevo total: ${appState.s2.saldoEuros.toFixed(2)} EUR`;
         renderizar();
     });
 
-    // Enlace de datos bidireccional mediante evento delegante
-    contenedorFormCon.addEventListener("input", (e) => {
+    // Delegación y sincronización bidireccional del formulario
+    formContainerMvc.addEventListener("input", (e) => {
         const campo = e.target.name; 
-        AppState.s3.formulario[campo] = e.target.value;
+        appState.s3.formulario[campo] = e.target.value;
     });
 
-    btnNextCon.addEventListener("click", () => {
-        AppState.s3.pasoActual = 2;
-        log.innerText = "[MVC DESACOPLADO]: Avanzando de pestaña. Los datos quedan blindados en el objeto JS.";
+    btnNextMvc.addEventListener("click", () => {
+        appState.s3.pasoActual = 2;
+        telemetryLog.innerText = "[MVC DESACOPLADO] Avanzado a Paso 2. Los datos de la memoria persisten intactos.";
         renderizar();
     });
 
-    btnPrevCon.addEventListener("click", () => {
-        AppState.s3.pasoActual = 1;
-        log.innerText = "[MVC DESACOPLADO]: Restaurando los valores almacenados en memoria.";
+    btnPrevMvc.addEventListener("click", () => {
+        appState.s3.pasoActual = 1;
+        telemetryLog.innerText = "[MVC DESACOPLADO] Regresado a Paso 1. Restableciendo campos desde el Modelo.";
         renderizar();
     });
 
-    btnS3Con.addEventListener("click", () => {
-        previewCon.innerText = JSON.stringify(AppState.s3.formulario);
+    btnS3Mvc.addEventListener("click", () => {
+        previewMvc.innerText = JSON.stringify(appState.s3.formulario);
+        telemetryLog.innerText = "[MVC DESACOPLADO] Payload de formulario exportado desde la memoria.";
     });
 
-    btnReset.addEventListener("click", resetearEstructura);
+    // Controladores Escenario 4
+    btnS4AddMvc.addEventListener("click", () => {
+        const index = appState.s4.items.length + 1;
+        appState.s4.items.push({
+            id: index,
+            name: `Servicio Pro #${index}`,
+            price: 49.99
+        });
+        telemetryLog.innerText = `[MVC DESACOPLADO] Añadido ítem al Modelo. 3 vistas independientes sincronizadas automáticamente.`;
+        renderizar();
+    });
+
+    btnS4ClearMvc.addEventListener("click", () => {
+        appState.s4.items = [];
+        telemetryLog.innerText = "[MVC DESACOPLADO] Carrito vaciado en el Modelo. Vistas notificadas y actualizadas.";
+        renderizar();
+    });
+
+    btnResetAll.addEventListener("click", resetearEstructura);
     resetearEstructura();
-})();

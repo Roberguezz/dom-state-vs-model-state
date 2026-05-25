@@ -1,126 +1,184 @@
-(function() {
-    const log = document.getElementById("telemetryMsg");
-    const btnReset = document.getElementById("btnResetAll");
 
-    // ESCENARIO 1
-    const btnS1Sin = document.getElementById("btnS1Sin");
-    const barSin = document.getElementById("barSin");
-    const lvlSin = document.getElementById("lvlSin");
-    const sliderS1 = document.getElementById("sliderS1");
-    const txtS1Res = document.getElementById("txtS1Res");
-    const wrapperSin = document.getElementById("wrapperSin");
+    const telemetryLog = document.getElementById("telemetryMsg");
+    const btnResetAll = document.getElementById("btnResetAll");
 
-    // ESCENARIO 2
-    const btnS2Sin = document.getElementById("btnS2Sin");
-    const selectS2Sin = document.getElementById("selectS2Sin");
-    const totalSin = document.getElementById("totalSin");
+    // Escenario 1: Acoplamiento de Escala y HUD
+    const btnS1Coupled = document.getElementById("btnS1Coupled");
+    const barCoupled = document.getElementById("barCoupled");
+    const lvlCoupled = document.getElementById("lvlCoupled");
+    const sliderScale = document.getElementById("sliderScale");
+    const labelScale = document.getElementById("labelScale");
+    const wrapperCoupled = document.getElementById("wrapperCoupled");
 
-    // ESCENARIO 3
-    const contenedorFormSin = document.getElementById("contenedorFormSin");
-    const btnPrevSin = document.getElementById("btnPrevSin");
-    const btnNextSin = document.getElementById("btnNextSin");
-    const btnS3Sin = document.getElementById("btnS3Sin");
-    const previewSin = document.getElementById("previewSin");
+    // Escenario 2: Acoplamiento Financiero y Parseo de Texto
+    const btnS2Coupled = document.getElementById("btnS2Coupled");
+    const selectS2Coupled = document.getElementById("selectS2Coupled");
+    const totalCoupled = document.getElementById("totalCoupled");
 
-    const HTML_P1 = `<label class="form-label">Nombre Completo del Usuario:</label>
-                     <input type="text" id="inputNombreSin" class="input" placeholder="Ej. Carlos Mendoza">`;
-    const HTML_P2 = `<label class="form-label">Número Telefónico Corporativo:</label>
-                     <input type="text" id="inputTelSin" class="input" placeholder="Ej. 600112233">`;
+    // Escenario 3: Destrucción de Nodos del DOM y Pérdida de Datos
+    const formContainerCoupled = document.getElementById("formContainerCoupled");
+    const btnPrevCoupled = document.getElementById("btnPrevCoupled");
+    const btnNextCoupled = document.getElementById("btnNextCoupled");
+    const btnS3Coupled = document.getElementById("btnS3Coupled");
+    const previewCoupled = document.getElementById("previewCoupled");
 
-    let pasoActualSin = 1;
-    let temporalTel = ""; 
+    // Escenario 4: Sincronización Acoplada Multivista
+    const btnS4AddCoupled = document.getElementById("btnS4AddCoupled");
+    const btnS4ClearCoupled = document.getElementById("btnS4ClearCoupled");
+    const cartBadgeCoupled = document.getElementById("cartBadgeCoupled");
+    const cartListCoupled = document.getElementById("cartListCoupled");
+    const cartTotalCoupled = document.getElementById("cartTotalCoupled");
+
+    const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
+                         <input type="text" id="inputNombreCoupled" class="input" placeholder="Ej. Carlos Mendoza">`;
+    const HTML_STEP_2 = `<label class="form-label">Número Telefónico Corporativo:</label>
+                         <input type="text" id="inputTelCoupled" class="input" placeholder="Ej. 600112233">`;
+
+    let coupledStep = 1;
+    let tempTelefono = ""; 
+    let coupledCartItems = [];
 
     function reiniciarTodo() {
-        barSin.style.width = "0px";
-        lvlSin.innerText = "1";
-        totalSin.innerText = "0.00€";
-        selectS2Sin.value = "EUR";
-        sliderS1.value = "100";
-        txtS1Res.innerText = "100px";
-        wrapperSin.style.width = "100px";
-        previewSin.innerText = "null";
-        pasoActualSin = 1;
-        temporalTel = "";
+        barCoupled.style.width = "0px";
+        lvlCoupled.innerText = "1";
+        totalCoupled.innerText = "0.00 €";
+        selectS2Coupled.value = "EUR";
+        sliderScale.value = "100";
+        labelScale.innerText = "100px";
+        wrapperCoupled.style.width = "100px";
+        previewCoupled.innerText = "null";
+        coupledStep = 1;
+        tempTelefono = "";
+        coupledCartItems = [];
+        cartBadgeCoupled.innerText = "0";
+        cartListCoupled.innerHTML = `<li class="cart-empty">Carrito vacío</li>`;
+        cartTotalCoupled.innerText = "$ 0.00";
         irAPaso1();
     }
 
-    // ESCENARIO 1: FLOTACIÓN DE PÍXELES
-    btnS1Sin.addEventListener("click", () => {
-        let px = parseInt(barSin.style.width) || 0;
+    // Escenario 1: Incremento acoplado al ancho físico (px) de la barra
+    btnS1Coupled.addEventListener("click", () => {
+        let px = parseInt(barCoupled.style.width) || 0;
         let nuevo = px + 20;
 
         if (nuevo >= 100) {
-            lvlSin.innerText = parseInt(lvlSin.innerText) + 1;
+            lvlCoupled.innerText = parseInt(lvlCoupled.innerText) + 1;
             nuevo = 0;
-            log.innerText = "[DOM ACOPLADO]: Nivel incrementado limpiando barra a 0px.";
+            telemetryLog.innerText = "[DOM ACOPLADO] Nivel incrementado limpiando barra a 0px física.";
         } else {
-            log.innerText = `[DOM ACOPLADO]: Progreso actual: ${nuevo}px de ancho físico.`;
+            telemetryLog.innerText = `[DOM ACOPLADO] Ancho de barra incrementado a: ${nuevo}px`;
         }
-        barSin.style.width = nuevo + "px";
+        barCoupled.style.width = nuevo + "px";
     });
 
-    // ESCENARIO 2: ERROR CRÍTICO DE PARSEO
-    selectS2Sin.addEventListener("change", (e) => {
+    // Escenario 2: Lectura de estado desde strings formateados en pantalla (Data Scraping)
+    selectS2Coupled.addEventListener("change", (e) => {
         const divisa = e.target.value;
-        let texto = totalSin.innerText;
-        let limpio = parseFloat(texto.replace("€", ""));
+        let texto = totalCoupled.innerText;
+        
+        // El replace de "€" falla si el texto contiene "$" o "¥", resultando en un valor numérico inválido (NaN)
+        let limpio = parseFloat(texto.replace(" €", ""));
 
         if (isNaN(limpio)) {
-            totalSin.innerText = "NaN";
-            log.innerText = "💥 [DOM ACOPLADO]: Error Fatal (NaN). El replace('€') no pudo limpiar el signo de dólar ($) u otro.";
+            totalCoupled.innerText = "NaN";
+            telemetryLog.innerText = "[DOM ACOPLADO] ERROR: No se pudo limpiar la divisa. Caracteres residuales causaron NaN.";
             return;
         }
 
-        if (divisa === "USD") totalSin.innerText = "$" + (limpio * 1.10).toFixed(2);
-        if (divisa === "JPY") totalSin.innerText = "¥" + Math.floor(limpio * 160);
-        if (divisa === "EUR") totalSin.innerText = limpio.toFixed(2) + "€";
+        if (divisa === "USD") totalCoupled.innerText = "$ " + (limpio * 1.10).toFixed(2);
+        else if (divisa === "JPY") totalCoupled.innerText = "¥ " + Math.floor(limpio * 160);
+        else if (divisa === "EUR") totalCoupled.innerText = limpio.toFixed(2) + " €";
+        
+        telemetryLog.innerText = `[DOM ACOPLADO] Divisa cambiada en pantalla a: ${divisa}`;
     });
 
-    btnS2Sin.addEventListener("click", () => {
-        let texto = totalSin.innerText;
-        let limpio = parseFloat(texto.replace("€", "").replace("$", "").replace("¥", ""));
+    btnS2Coupled.addEventListener("click", () => {
+        let texto = totalCoupled.innerText;
+        // Intenta limpiar múltiples signos a mano en la vista
+        let limpio = parseFloat(texto.replace(" €", "").replace("$ ", "").replace("¥ ", ""));
 
         if (isNaN(limpio)) {
-            log.innerText = "💥 [DOM ACOPLADO]: Operación abortada. La pantalla está corrupta con NaN.";
+            telemetryLog.innerText = "[DOM ACOPLADO] ERROR: Operación abortada. El total en pantalla contiene NaN.";
             return;
         }
 
         let total = limpio + 10.00;
-        let div = selectS2Sin.value;
-        totalSin.innerText = div === "EUR" ? total.toFixed(2) + "€" : (div === "USD" ? "$" + total.toFixed(2) : "¥" + Math.floor(total));
+        let div = selectS2Coupled.value;
+        
+        if (div === "EUR") totalCoupled.innerText = total.toFixed(2) + " €";
+        else if (div === "USD") totalCoupled.innerText = "$ " + total.toFixed(2);
+        else if (div === "JPY") totalCoupled.innerText = "¥ " + Math.floor(total);
+        
+        telemetryLog.innerText = `[DOM ACOPLADO] Saldo en pantalla incrementado (+10.00 en divisa activa).`;
     });
 
-    // ESCENARIO 3: DESTRUCCIÓN DE NODOS
+    // Escenario 3: Destrucción física de nodos y pérdida de variables de entrada
     function irAPaso1() {
-        pasoActualSin = 1;
-        contenedorFormSin.innerHTML = HTML_P1;
-        btnPrevSin.disabled = true;
-        btnNextSin.disabled = false;
+        coupledStep = 1;
+        formContainerCoupled.innerHTML = HTML_STEP_1;
+        btnPrevCoupled.disabled = true;
+        btnNextCoupled.disabled = false;
     }
 
-    btnNextSin.addEventListener("click", () => {
-        pasoActualSin = 2;
-        contenedorFormSin.innerHTML = HTML_P2;
-        document.getElementById("inputTelSin").value = temporalTel;
-        btnPrevSin.disabled = false;
-        btnNextSin.disabled = true;
-        log.innerText = "⚠️ [DOM ACOPLADO]: Se destruyó el Paso 1. Los datos no persistidos se eliminaron del árbol visual.";
+    btnNextCoupled.addEventListener("click", () => {
+        coupledStep = 2;
+        formContainerCoupled.innerHTML = HTML_STEP_2;
+        document.getElementById("inputTelCoupled").value = tempTelefono;
+        btnPrevCoupled.disabled = false;
+        btnNextCoupled.disabled = true;
+        telemetryLog.innerText = "[DOM ACOPLADO] Paso 1 destruido mediante innerHTML. Datos no guardados en variables se pierden.";
     });
 
-    btnPrevSin.addEventListener("click", () => {
-        temporalTel = document.getElementById("inputTelSin").value;
+    btnPrevCoupled.addEventListener("click", () => {
+        // Guarda el teléfono temporalmente en memoria, pero el nombre se pierde al haber sido destruido del DOM
+        tempTelefono = document.getElementById("inputTelCoupled").value;
         irAPaso1();
-        log.innerText = "💥 [DOM ACOPLADO]: Regresaste al Paso 1. El campo del nombre vuelve a estar vacío.";
+        telemetryLog.innerText = "[DOM ACOPLADO] Retornado a Paso 1. El campo de texto de Nombre está vacío.";
     });
 
-    btnS3Sin.addEventListener("click", () => {
-        let nombreDetectado = document.getElementById("inputNombreSin") ? document.getElementById("inputNombreSin").value : "";
-        let telDetectado = document.getElementById("inputTelSin") ? document.getElementById("inputTelSin").value : temporalTel;
+    btnS3Coupled.addEventListener("click", () => {
+        let nombreDetectado = document.getElementById("inputNombreCoupled") ? document.getElementById("inputNombreCoupled").value : "";
+        let telDetectado = document.getElementById("inputTelCoupled") ? document.getElementById("inputTelCoupled").value : tempTelefono;
 
         let payload = { nombre: nombreDetectado, telefono: telDetectado };
-        previewSin.innerText = JSON.stringify(payload);
+        previewCoupled.innerText = JSON.stringify(payload);
+        telemetryLog.innerText = "[DOM ACOPLADO] Payload guardado leyendo nodos activos en tiempo real.";
     });
 
-    btnReset.addEventListener("click", reiniciarTodo);
+    // Escenario 4: Sincronización manual multipunto en la vista
+    btnS4AddCoupled.addEventListener("click", () => {
+        const index = coupledCartItems.length + 1;
+        const newItem = { id: index, name: `Servicio Pro #${index}`, price: 49.99 };
+        coupledCartItems.push(newItem);
+
+        // Modificación manual 1: Badge de cabecera
+        cartBadgeCoupled.innerText = coupledCartItems.length;
+
+        // Modificación manual 2: Inserción directa de nodo en la lista
+        if (coupledCartItems.length === 1) {
+            cartListCoupled.innerHTML = ""; // Limpiar placeholder de vacío
+        }
+        const li = document.createElement("li");
+        li.className = "cart-item";
+        li.innerHTML = `<span>${newItem.name}</span><span class="cart-item-price">$ ${newItem.price.toFixed(2)}</span>`;
+        cartListCoupled.appendChild(li);
+
+        // Modificación manual 3: Cálculo del total y actualización de pantalla
+        let total = 0;
+        coupledCartItems.forEach(item => total += item.price);
+        cartTotalCoupled.innerText = `$ ${total.toFixed(2)}`;
+
+        telemetryLog.innerText = "[DOM ACOPLADO] Modificados individualmente Badge, Lista e Indicador de Total en el DOM.";
+    });
+
+    btnS4ClearCoupled.addEventListener("click", () => {
+        coupledCartItems = [];
+        // Reseteo manual de todas las vistas acopladas
+        cartBadgeCoupled.innerText = "0";
+        cartListCoupled.innerHTML = `<li class="cart-empty">Carrito vacío</li>`;
+        cartTotalCoupled.innerText = "$ 0.00";
+        telemetryLog.innerText = "[DOM ACOPLADO] Vistas reseteadas manualmente una a una tras borrar la colección.";
+    });
+
+    btnResetAll.addEventListener("click", reiniciarTodo);
     reiniciarTodo();
-})();

@@ -3,233 +3,439 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Manual de Arquitectura Web: DOM vs MVC</title>
+    <title>Desacoplamiento Frontend: DOM vs MVC</title>
+    <!-- Tipografía de Google Fonts Premium -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-vsc-darkplus.min.css">
 </head>
 <body>
 
     <div class="container">
-        <header>
+        <!-- Encabezado Estilizado con Marca -->
+        <header class="app-header">
+            <div class="badge-tech">LABORATORIO ARQUITECTÓNICO</div>
             <h1>Separación de Estado</h1>
-            <p class="lead">Un laboratorio visual diseñado para entender de forma empírica los riesgos de almacenar la lógica en el árbol de nodos HTML (DOM).</p>
+            <p class="lead">Un laboratorio visual diseñado para entender de forma empírica la diferencia de almacenar la lógica en el árbol de nodos HTML (DOM) frente a un flujo unificado y centralizado en memoria (MVC).</p>
             <div class="global-actions">
-                <button id="btnResetAll" class="btn btn-secondary">🔄 Restablecer Suite por Completo</button>
+                <button id="btnResetAll" class="btn btn-secondary flex-center">
+                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+                    </svg>
+                    Restablecer Suite por Completo
+                </button>
             </div>
         </header>
 
+        <!-- ESCENARIO 01 -->
         <section class="section" id="escenario1">
-            <h2>01. Escala del Componente de Interfaz (HUD)</h2>
-            <p class="description">Simula una interfaz de juego o cuadro de mandos responsivo. Modifica el tamaño del HUD con el deslizador (limitado a un máximo de 300px). El sistema acoplado calcula el progreso basándose de forma absoluta en píxeles de pantalla, por lo que al estirar la interfaz, la barra nunca logra llenarse del todo. El sistema MVC se adapta perfectamente usando porcentajes nativos independientes de la escala física.</p>
+            <div class="section-badge">01 // ESCALABILIDAD RESPONSIVA</div>
+            <h2>Escala del Componente de Interfaz (HUD)</h2>
+            <p class="description">
+                <strong>Un consejo de colega:</strong> Imagina que estás maquetando un componente responsivo o un HUD de juego que escala según la pantalla. Si tu lógica calcula el progreso leyendo directamente los píxeles físicos del elemento en el DOM, tu aplicación se romperá al cambiar el tamaño de la interfaz. Al acoplar el cálculo matemático a los píxeles de pantalla, dependes del renderizado físico del navegador. Con MVC, mantenemos el estado puro en memoria con porcentajes y dejamos que la vista se adapte libremente.
+            </p>
             
-            <div class="inline-control">
-                <label for="sliderS1">Escala del HUD de la aplicación (Max 300px):</label>
-                <input type="range" id="sliderS1" min="100" max="300" value="100">
-                <span id="txtS1Res" class="badge">100px</span>
+            <div class="inline-control-card">
+                <label for="sliderScale">Ajustar ancho físico del HUD (100px - 300px):</label>
+                <div class="control-row">
+                    <input type="range" id="sliderScale" min="100" max="300" value="100" class="custom-slider">
+                    <span id="labelScale" class="badge">100px</span>
+                </div>
             </div>
 
             <div class="grid">
                 <div class="panel panel-no-mvc">
-                    <div class="panel-header">Código Acoplado (DOM)</div>
-                    <button id="btnS1Sin" class="btn btn-primary">Cargar Datos (+20 Puntos)</button>
-                    <div class="sandbox">
-                        <div class="metric">Nivel HUD: <span id="lvlSin">1</span></div>
-                        <div class="progress-container" id="wrapperSin"><div id="barSin" class="progress-bar" style="width: 0px;"></div></div>
+                    <div class="panel-header">
+                        <span class="dot dot-red"></span> Código Acoplado (DOM)
                     </div>
-                </div>
-                <div class="panel panel-mvc">
-                    <div class="panel-header">Código Desacoplado (MVC)</div>
-                    <button id="btnS1Con" class="btn btn-primary">Cargar Datos (+20 Puntos)</button>
-                    <div class="sandbox">
-                        <div class="metric">Nivel HUD: <span id="lvlCon">1</span></div>
-                        <div class="progress-container" id="wrapperCon"><div id="barCon" class="progress-bar" style="width: 0%;"></div></div>
-                    </div>
-                </div>
-            </div>
-
-            <details class="code-details">
-                <summary>🔍 Explicación técnica y Código Fuente</summary>
-                <div class="code-grid">
-                    <div>
-                        <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Lee los píxeles directamente de la pantalla
-let px = parseInt(bar.style.width) || 0;
-let nuevo = px + 20;
-
-// ERROR: Si el HUD se escala a 300px, la barra crecerá sumando píxeles pero la condición estricta (>=100px) se romperá o reseteará antes de tiempo.
-if (nuevo >= 100) {
-    nivel.innerText = parseInt(nivel.innerText) + 1;
-    nuevo = 0;
-}
-bar.style.width = nuevo + "px";</code></pre>
-                    </div>
-                    <div>
-                        <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Opera siempre sobre datos puros en memoria RAM
-modelo.progreso += 20;
-
-if (modelo.progreso >= 100) {
-    modelo.nivel += 1;
-    modelo.progreso = 0;
-}
-
-// La vista se limita a renderizar el porcentaje. No importa el tamaño del contenedor, el cálculo es exacto.
-bar.style.width = modelo.progreso + "%";</code></pre>
-                    </div>
-                </div>
-                <div class="analysis-block">
-                    <p><strong>¿Qué falla en el código acoplado?</strong> Al cambiar el tamaño del HUD a 300px, el código sigue asumiendo de manera fija que el límite es 100px de ancho. La lógica matemática quedó ligada a las propiedades de renderizado del navegador, alterando las condiciones del negocio al cambiar la resolución.</p>
-                </div>
-            </details>
-        </section>
-
-        <section class="section" id="escenario2">
-            <h2>02. Conversión Dinámica de Divisas</h2>
-            <p class="description">Al cambiar de moneda, el checkout acoplado raspa el texto de la pantalla, pero al encontrar nuevos símbolos como el signo de dólar ($) o yenes (¥), el limpiador de texto se rompe dejando el total en un error irreversible (NaN) o congelando el precio. El sistema MVC procesa los datos numéricos de forma limpia en memoria.</p>
-            
-            <div class="grid">
-                <div class="panel panel-no-mvc">
-                    <div class="panel-header">Código Acoplado (DOM)</div>
-                    <select id="selectS2Sin" class="select">
-                        <option value="EUR">Euros (€) - Moneda Base</option>
-                        <option value="USD">Dólares ($) - Tasa 1.10</option>
-                        <option value="JPY">Yenes (¥) - Tasa 160</option>
-                    </select>
-                    <button id="btnS2Sin" class="btn btn-primary">Añadir Ítem Financiero (10.00€)</button>
-                    <div class="sandbox">
-                        <div class="total-display" style="color: var(--flat-red);">Total: <span id="totalSin">0.00€</span></div>
-                    </div>
-                </div>
-                <div class="panel panel-mvc">
-                    <div class="panel-header">Código Desacoplado (MVC)</div>
-                    <select id="selectS2Con" class="select">
-                        <option value="EUR">Euros (€) - Moneda Base</option>
-                        <option value="USD">Dólares ($) - Tasa 1.10</option>
-                        <option value="JPY">Yenes (¥) - Tasa 160</option>
-                    </select>
-                    <button id="btnS2Con" class="btn btn-primary">Añadir Ítem Financiero (10.00€)</button>
-                    <div class="sandbox">
-                        <div class="total-display" style="color: var(--flat-green);">Total: <span id="totalCon">0.00€</span></div>
-                    </div>
-                </div>
-            </div>
-
-            <details class="code-details">
-                <summary>🔍 Explicación técnica y Código Fuente</summary>
-                <div class="code-grid">
-                    <div>
-                        <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Intenta leer el texto directo del HTML
-let texto = totalHtml.innerText; 
-
-// BUG: Al cambiar a USD el texto pasa a "$11.00". El replace("€") no quita el "$", provocando que parseFloat devuelva un error NaN destructivo.
-let actual = parseFloat(texto.replace("€", ""));
-let nuevo = actual + 10.00;
-
-totalHtml.innerText = nuevo + "€";</code></pre>
-                    </div>
-                    <div>
-                        <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Modifica el flotante puro en memoria JS
-modelo.eurosBase += 10.00;
-
-// La vista se limita a multiplicar y formatear
-let tasa = listaTasas[divisaActiva];
-let totalReal = modelo.eurosBase * tasa;
-
-totalHtml.innerText = formatearTexto(totalReal, divisaActiva);</code></pre>
-                    </div>
-                </div>
-                <div class="analysis-block">
-                    <p><strong>¿Qué falló en el código acoplado?</strong> Se usó la interfaz de usuario como si fuera una base de datos de texto (técnica conocida como <em>Data Scraping</em>). En cuanto la interfaz cambió su formato internacional para mostrar el símbolo en otra posición, las funciones de limpieza de texto fallaron e inyectaron un valor corrupto <code>NaN</code> en las cuentas de cobro.</p>
-                </div>
-            </details>
-        </section>
-
-        <section class="section" id="escenario3">
-            <h2>03. Ciclo de Vida y Persistencia de Formulario</h2>
-            <p class="description">Al avanzar en un formulario por pasos, las aplicaciones modernas eliminan del DOM los campos ocultos para ahorrar memoria. Escribe tu nombre en el Paso 1, avanza al Paso 2 y luego regresa. En el panel acoplado notarás que tu nombre se ha borrado para siempre al desaparecer su etiqueta HTML. En el panel MVC, el dato permanece a salvo en el modelo.</p>
-            
-            <div class="grid">
-                <div class="panel panel-no-mvc">
-                    <div class="panel-header">Código Acoplado (DOM)</div>
-                    <div style="min-height: 90px;" id="contenedorFormSin"></div>
-                    <div class="form-actions">
-                        <button id="btnPrevSin" class="btn btn-secondary" disabled>⏮️ Atrás</button>
-                        <button id="btnNextSin" class="btn btn-secondary">Siguiente ⏭️</button>
-                    </div>
-                    <div class="sandbox">
-                        <button id="btnS3Sin" class="btn btn-primary">💾 Guardar Registro</button>
-                        <div style="font-size:0.85rem; margin-top:12px;">Payload capturado: <span id="previewSin" class="code-inline">null</span></div>
+                    <div class="sandbox-content">
+                        <button id="btnS1Coupled" class="btn btn-primary">Cargar Datos (+20 Puntos)</button>
+                        <div class="sandbox">
+                            <div class="metric">Nivel HUD: <span id="lvlCoupled" class="counter">1</span></div>
+                            <div class="progress-container" id="wrapperCoupled">
+                                <div id="barCoupled" class="progress-bar bar-red" style="width: 0px;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
                 <div class="panel panel-mvc">
-                    <div class="panel-header">Código Desacoplado (MVC)</div>
-                    <div style="min-height: 90px;" id="contenedorFormCon"></div>
-                    <div class="form-actions">
-                        <button id="btnPrevCon" class="btn btn-secondary" disabled>⏮️ Atrás</button>
-                        <button id="btnNextCon" class="btn btn-secondary">Siguiente ⏭️</button>
+                    <div class="panel-header">
+                        <span class="dot dot-green"></span> Código Desacoplado (MVC)
                     </div>
-                    <div class="sandbox">
-                        <button id="btnS3Con" class="btn btn-primary">💾 Guardar Registro</button>
-                        <div style="font-size:0.85rem; margin-top:12px;">Payload capturado: <span id="previewCon" class="code-inline">null</span></div>
+                    <div class="sandbox-content">
+                        <button id="btnS1Mvc" class="btn btn-primary">Cargar Datos (+20 Puntos)</button>
+                        <div class="sandbox">
+                            <div class="metric">Nivel HUD: <span id="lvlMvc" class="counter">1</span></div>
+                            <div class="progress-container" id="wrapperMvc">
+                                <div id="barMvc" class="progress-bar bar-green" style="width: 0%;"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
             <details class="code-details">
-                <summary>🔍 Explicación técnica y Código Fuente</summary>
+                <summary class="flex-center">
+                    <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                    Análisis Técnico y Código de Muestra
+                </summary>
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Reconstruye el HTML destruyendo el anterior
-function cambiarAPaso2() {
-    // Al sobreescribir el contenedor con innerHTML, el valor que escribió el usuario en el Paso 1 se elimina de la existencia por completo.
-    contenedor.innerHTML = HTML_PASO_2;
+                        <pre class="language-javascript"><code class="language-javascript">// Lee los píxeles directamente del estilo de la pantalla
+let px = parseInt(barCoupled.style.width) || 0;
+let nuevo = px + 20;
+
+// Si el HUD cambia a 300px, el límite estricto de 100px rompe el flujo
+if (nuevo >= 100) {
+    lvlCoupled.innerText = parseInt(lvlCoupled.innerText) + 1;
+    nuevo = 0;
+}
+barCoupled.style.width = nuevo + "px";</code></pre>
+                    </div>
+                    <div>
+                        <div class="code-label">mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">// Modifica el dato puro en memoria (en porcentaje)
+appState.s1.progreso += 20;
+
+if (appState.s1.progreso >= 100) {
+    appState.s1.nivel += 1;
+    appState.s1.progreso = 0;
+}
+
+// La vista renderiza el porcentaje adaptativo de forma reactiva
+barMvc.style.width = appState.s1.progreso + "%";</code></pre>
+                    </div>
+                </div>
+                <div class="analysis-block">
+                    <p><strong>¿Por qué falla el acoplamiento?</strong> Al cambiar el tamaño del HUD a 300px, el código acoplado sigue limitando de forma rígida la barra a 100px, debido a que su lógica matemática quedó ligada a las dimensiones físicas de la pantalla. Separando el estado (MVC), el cálculo es inmune a las dimensiones visuales del contenedor.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- ESCENARIO 02 -->
+        <section class="section" id="escenario2">
+            <div class="section-badge">02 // INTEGRIDAD DE DATOS</div>
+            <h2>Conversión Dinámica de Divisas</h2>
+            <p class="description">
+                <strong>Un consejo de colega:</strong> Es muy tentador hacer "data scraping" leyendo el texto de las etiquetas HTML para ahorrarte una variable en JS. Pero mira lo que ocurre al internacionalizar tu app: en cuanto aparece un símbolo de otra divisa como el signo de dólar ($) o yenes (¥), tus funciones de limpieza de texto fallan estrepitosamente, inyectando un valor corrupto (NaN) de forma irreversible en tus cuentas. Si mantienes el valor numérico limpio en el modelo, la vista solo se limita a presentarlo formateado. ¡Tus cuentas saldrán perfectas!
+            </p>
+            
+            <div class="grid">
+                <div class="panel panel-no-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-red"></span> Código Acoplado (DOM)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="control-group">
+                            <label class="form-label">Divisa seleccionada:</label>
+                            <select id="selectS2Coupled" class="select">
+                                <option value="EUR">Euros (€) - Base</option>
+                                <option value="USD">Dólares ($) - Tasa 1.10</option>
+                                <option value="JPY">Yenes (¥) - Tasa 160</option>
+                            </select>
+                        </div>
+                        <button id="btnS2Coupled" class="btn btn-primary">Añadir Saldo (+10.00)</button>
+                        <div class="sandbox flex-center">
+                            <div class="total-display text-red" id="totalCoupled">0.00 €</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel panel-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-green"></span> Código Desacoplado (MVC)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="control-group">
+                            <label class="form-label">Divisa seleccionada:</label>
+                            <select id="selectS2Mvc" class="select">
+                                <option value="EUR">Euros (€) - Base</option>
+                                <option value="USD">Dólares ($) - Tasa 1.10</option>
+                                <option value="JPY">Yenes (¥) - Tasa 160</option>
+                            </select>
+                        </div>
+                        <button id="btnS2Mvc" class="btn btn-primary">Añadir Saldo (+10.00)</button>
+                        <div class="sandbox flex-center">
+                            <div class="total-display text-green" id="totalMvc">0.00 €</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <details class="code-details">
+                <summary class="flex-center">
+                    <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                    Análisis Técnico y Código de Muestra
+                </summary>
+                <div class="code-grid">
+                    <div>
+                        <div class="code-label">no-mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">// Lee el texto visible directo de la pantalla
+let texto = totalCoupled.innerText;
+
+// BUG: Al cambiar a USD el texto pasa a "$ 11.00".
+// El replace(" €") no quita el "$" y el parser inyecta un NaN destructivo
+let limpio = parseFloat(texto.replace(" €", ""));
+let total = limpio + 10.00;
+
+totalCoupled.innerText = total + " €";</code></pre>
+                    </div>
+                    <div>
+                        <div class="code-label">mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">// El incremento financiero ocurre sobre memoria RAM pura
+appState.s2.saldoEuros += 10.00;
+
+// La vista se limita a multiplicar por la tasa y dar formato
+let tasa = appState.tasas[divisaActiva];
+let totalCalculado = appState.s2.saldoEuros * tasa;
+
+totalMvc.innerText = formatear(totalCalculado, divisaActiva);</code></pre>
+                    </div>
+                </div>
+                <div class="analysis-block">
+                    <p><strong>¿Por qué ocurre este error?</strong> Se ha usado la interfaz como si fuese una base de datos (técnica frágil llamada <em>Data Scraping</em>). Al alterar el orden o los símbolos de los caracteres monetarios internacionales, las expresiones regulares básicas fallan y devuelven un estado corrupto <code>NaN</code>.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- ESCENARIO 03 -->
+        <section class="section" id="escenario3">
+            <div class="section-badge">03 // CICLO DE VIDA DEL DOM</div>
+            <h2>Persistencia de Formulario y Ciclo de Vida</h2>
+            <p class="description">
+                <strong>Un consejo de colega:</strong> En aplicaciones interactivas modernas por pasos, solemos destruir y renderizar partes del DOM para mantener la interfaz ligera y optimizada. Si confías en que los inputs del HTML almacenen la información del usuario, al eliminar la sección para avanzar de pantalla, esos datos se evaporarán. Centralizar los inputs en un modelo en memoria garantiza que, aunque destruyas y recrees la interfaz mil veces, la información de tu usuario estará sana y salva. Escribe tu nombre en el paso 1, avanza al paso 2 y luego regresa: verás que la versión acoplada te ha borrado el nombre para siempre.
+            </p>
+            
+            <div class="grid">
+                <div class="panel panel-no-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-red"></span> Código Acoplado (DOM)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="form-box" id="formContainerCoupled" style="min-height: 90px;"></div>
+                        <div class="form-actions">
+                            <button id="btnPrevCoupled" class="btn btn-secondary flex-center" disabled>
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                                Atrás
+                            </button>
+                            <button id="btnNextCoupled" class="btn btn-secondary flex-center">
+                                Siguiente
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                            </button>
+                        </div>
+                        <div class="sandbox-action">
+                            <button id="btnS3Coupled" class="btn btn-primary">Exportar Registro</button>
+                            <div class="payload-box">Payload capturado: <span id="previewCoupled" class="code-inline">null</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel panel-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-green"></span> Código Desacoplado (MVC)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="form-box" id="formContainerMvc" style="min-height: 90px;"></div>
+                        <div class="form-actions">
+                            <button id="btnPrevMvc" class="btn btn-secondary flex-center" disabled>
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+                                Atrás
+                            </button>
+                            <button id="btnNextMvc" class="btn btn-secondary flex-center">
+                                Siguiente
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                            </button>
+                        </div>
+                        <div class="sandbox-action">
+                            <button id="btnS3Mvc" class="btn btn-primary">Exportar Registro</button>
+                            <div class="payload-box">Payload capturado: <span id="previewMvc" class="code-inline">null</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <details class="code-details">
+                <summary class="flex-center">
+                    <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                    Análisis Técnico y Código de Muestra
+                </summary>
+                <div class="code-grid">
+                    <div>
+                        <div class="code-label">no-mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">// Reemplaza físicamente la vista con innerHTML
+function irAPaso2() {
+    // Al sobrescribir el nodo padre, el valor del input del Paso 1
+    // que el usuario escribió se destruye por completo del DOM
+    formContainerCoupled.innerHTML = HTML_STEP_2;
 }</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Captura los datos en tiempo real al escribir
-contenedor.addEventListener("input", (e) => {
-    modelo.formulario[e.target.name] = e.target.value;
+                        <pre class="language-javascript"><code class="language-javascript">// Escucha los cambios del input en tiempo real sobre el Modelo
+formContainerMvc.addEventListener("input", (e) => {
+    appState.s3.formulario[e.target.name] = e.target.value;
 });
 
-// Al regresar al Paso 1, la vista lee la memoria
+// Al reconstruir los campos, se restauran desde memoria
 function renderPaso1() {
-    contenedor.innerHTML = HTML_PASO_1;
-    document.getElementById("inputNombre").value = modelo.formulario.nombre;
+    formContainerMvc.innerHTML = HTML_STEP_1;
+    document.getElementById("inputNombreMvc").value = appState.s3.formulario.nombre;
 }</code></pre>
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>¿Por qué se borran los datos en el caso acoplado?</strong> Al cambiar de paso, el script utiliza <code>innerHTML</code> para limpiar la vista y dibujar los nuevos campos. Como el valor del campo de texto no se guardó en ninguna variable de JavaScript, la información desaparece al destruir el elemento HTML de la pantalla.</p>
+                    <p><strong>¿Por qué se pierde la información?</strong> Al usar <code>innerHTML</code> para cambiar de pantalla, el navegador destruye los nodos antiguos del DOM. Puesto que el valor escrito no existía en variables de JavaScript, el estado de los datos del usuario es destruido permanentemente al desaparecer su representación visual.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- ESCENARIO 04 (NUEVO) -->
+        <section class="section" id="escenario4">
+            <div class="section-badge">04 // SINCRONIZACIÓN MULTIVISTA</div>
+            <h2>Sincronización Multivista en Tiempo Real</h2>
+            <p class="description">
+                <strong>Un consejo de colega:</strong> Imagina que tienes un carrito de compras y necesitas actualizar tres vistas independientes al mismo tiempo: un contador del carrito en la cabecera, la lista detallada de servicios en el centro y el total acumulado en el pie de página. Con el código acoplado al DOM, cada click te obliga a buscar y mutar a mano cada uno de los elementos visuales por separado. Si mañana añades una cuarta vista, tu código se volverá increíblemente frágil. Con MVC, modifiques lo que modifiques, solo actualizas una colección en memoria y la función de renderizado se encarga de que todas las vistas permanezcan unificadas y sin fallas.
+            </p>
+            
+            <div class="grid">
+                <div class="panel panel-no-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-red"></span> Código Acoplado (DOM)
+                    </div>
+                    <div class="sandbox-content">
+                        <!-- Vista 1: Cabecera de carrito -->
+                        <div class="cart-header-widget flex-between">
+                            <span class="widget-title">🛒 Resumen de Servicios</span>
+                            <span class="badge badge-red" id="cartBadgeCoupled">0</span>
+                        </div>
+                        
+                        <!-- Vista 2: Lista de ítems en el DOM -->
+                        <div class="sandbox cart-sandbox">
+                            <ul id="cartListCoupled" class="cart-list">
+                                <li class="cart-empty">Carrito vacío</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Vista 3: Total del carrito -->
+                        <div class="cart-total-bar flex-between">
+                            <span class="total-label">Total a pagar:</span>
+                            <span class="total-display text-red" id="cartTotalCoupled">$ 0.00</span>
+                        </div>
+
+                        <div class="form-actions space-top">
+                            <button id="btnS4AddCoupled" class="btn btn-primary">Añadir Servicio (+$49.99)</button>
+                            <button id="btnS4ClearCoupled" class="btn btn-secondary">Vaciar Carrito</button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel panel-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-green"></span> Código Desacoplado (MVC)
+                    </div>
+                    <div class="sandbox-content">
+                        <!-- Vista 1: Cabecera de carrito -->
+                        <div class="cart-header-widget flex-between">
+                            <span class="widget-title">🛒 Resumen de Servicios</span>
+                            <span class="badge badge-green" id="cartBadgeMvc">0</span>
+                        </div>
+                        
+                        <!-- Vista 2: Lista de ítems en el Modelo -->
+                        <div class="sandbox cart-sandbox">
+                            <ul id="cartListMvc" class="cart-list">
+                                <li class="cart-empty">Carrito vacío</li>
+                            </ul>
+                        </div>
+                        
+                        <!-- Vista 3: Total del carrito -->
+                        <div class="cart-total-bar flex-between">
+                            <span class="total-label">Total a pagar:</span>
+                            <span class="total-display text-green" id="cartTotalMvc">$ 0.00</span>
+                        </div>
+
+                        <div class="form-actions space-top">
+                            <button id="btnS4AddMvc" class="btn btn-primary">Añadir Servicio (+$49.99)</button>
+                            <button id="btnS4ClearMvc" class="btn btn-secondary">Vaciar Carrito</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <details class="code-details">
+                <summary class="flex-center">
+                    <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                    Análisis Técnico y Código de Muestra
+                </summary>
+                <div class="code-grid">
+                    <div>
+                        <div class="code-label">no-mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">// Inserción manual a múltiples elementos del DOM
+cartBadgeCoupled.innerText = coupledCartItems.length;
+
+const li = document.createElement("li");
+li.innerHTML = `<span>${newItem.name}</span><span>$${newItem.price}</span>`;
+cartListCoupled.appendChild(li);
+
+let total = 0;
+coupledCartItems.forEach(item => total += item.price);
+cartTotalCoupled.innerText = `$ ${total.toFixed(2)}`;</code></pre>
+                    </div>
+                    <div>
+                        <div class="code-label">mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">// 1. Mutación exclusiva de la estructura en memoria
+appState.s4.items.push(nuevoItem);
+
+// 2. Renderizado unificado y consistente
+function renderizar() {
+    cartBadgeMvc.innerText = appState.s4.items.length;
+    cartListMvc.innerHTML = appState.s4.items.map(renderItemHtml).join("");
+    cartTotalMvc.innerText = `$ ${calcularTotal().toFixed(2)}`;
+}</code></pre>
+                    </div>
+                </div>
+                <div class="analysis-block">
+                    <p><strong>¿Qué ventaja aporta el desacoplamiento?</strong> Con el código acoplado, actualizar 3 vistas independientes requiere escribir selectores imperativos redundantes para cada elemento en el DOM. En cambio, con MVC la interfaz se reduce a ser un reflejo directo del Modelo. Si agregamos una cuarta o quinta vista en el futuro, no es necesario tocar los controladores existentes, garantizando consistencia absoluta y escalabilidad.</p>
                 </div>
             </details>
         </section>
     </div>
 
+    <!-- Consola de Telemetría Flotante Ultra-Premium -->
     <div class="telemetry-bar">
-        <span class="telemetry-tag">TELEMETRÍA //</span>
-        <span id="telemetryMsg">Consola de seguimiento unificada activa.</span>
+        <div class="telemetry-brand">
+            <span class="pulse-indicator"></span>
+            <span class="telemetry-tag">TELEMETRÍA //</span>
+        </div>
+        <span id="telemetryMsg" class="telemetry-message">Iniciando consola de seguimiento unificada del laboratorio...</span>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="no-mvc.js"></script>
-    <script src="mvc.js"></script>
+    <script type="module" src="no-mvc.js"></script>
+    <script type="module" src="mvc.js"></script>
 
     <script>
-        const sliderS1 = document.getElementById("sliderS1");
-        const txtS1Res = document.getElementById("txtS1Res");
-        const wrapperSin = document.getElementById("wrapperSin");
-        const wrapperCon = document.getElementById("wrapperCon");
+        const sliderScale = document.getElementById("sliderScale");
+        const labelScale = document.getElementById("labelScale");
+        const wrapperCoupled = document.getElementById("wrapperCoupled");
+        const wrapperMvc = document.getElementById("wrapperMvc");
 
-        sliderS1.addEventListener("input", (e) => {
+        sliderScale.addEventListener("input", (e) => {
             const tamaño = e.target.value + "px";
-            txtS1Res.innerText = tamaño;
-            wrapperSin.style.width = tamaño;
-            wrapperCon.style.width = tamaño;
+            labelScale.innerText = tamaño;
+            wrapperCoupled.style.width = tamaño;
+            wrapperMvc.style.width = tamaño;
         });
 
         document.addEventListener("DOMContentLoaded", () => {
