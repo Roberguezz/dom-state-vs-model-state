@@ -496,6 +496,200 @@ btnS5StartCoupled.addEventListener("click", () => {
                 </div>
             </details>
         </section>
+
+        <!-- ESCENARIO 06 -->
+        <section class="section" id="escenario6">
+            <div class="section-badge">06 // GRADIENTE DE COLOR DINÁMICO</div>
+            <h2>Selector de Colores y Gradientes en Vivo</h2>
+            <p class="description">
+                Cambiar colores en la interfaz se ve simple, pero si el estado se almacena solo en el DOM (por ejemplo, en un atributo <code>style</code> o en valores de input sin sincronización), modificar el contenedor puede perder la información. En la versión acoplada, al resetear la página o cambiar de sección, el color seleccionado se pierde. Con un Modelo centralizado, cualquier cambio de color se mantiene persistente incluso después de recargas del DOM.
+            </p>
+            
+            <div class="grid">
+                <div class="panel panel-no-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="control-group">
+                            <label class="form-label">Selecciona un color:</label>
+                            <input type="color" id="colorPickerCoupled" class="input" value="#ff6b6b" style="height: 40px; cursor: pointer;">
+                        </div>
+                        <div class="sandbox" id="gradientBoxCoupled" style="background: linear-gradient(135deg, #ff6b6b, #ffa500); min-height: 120px; border-radius: 4px; transition: background 0.3s;">
+                        </div>
+                        <div class="sandbox-action">
+                            <button id="btnS6ResetCoupled" class="btn btn-secondary">Limpiar Gradiente</button>
+                            <div class="payload-box">Color seleccionado: <span id="colorDisplayCoupled" class="code-inline">#ff6b6b</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel panel-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="control-group">
+                            <label class="form-label">Selecciona un color:</label>
+                            <input type="color" id="colorPickerMvc" class="input" value="#6bcf7f" style="height: 40px; cursor: pointer;">
+                        </div>
+                        <div class="sandbox" id="gradientBoxMvc" style="background: linear-gradient(135deg, #6bcf7f, #4ec9b0); min-height: 120px; border-radius: 4px; transition: background 0.3s;">
+                        </div>
+                        <div class="sandbox-action">
+                            <button id="btnS6ResetMvc" class="btn btn-secondary">Limpiar Gradiente</button>
+                            <div class="payload-box">Color seleccionado: <span id="colorDisplayMvc" class="code-inline">#6bcf7f</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <details class="code-details">
+                <summary class="flex-center">
+                    <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                    Código fuente de comparación
+                </summary>
+                <div class="code-grid">
+                    <div>
+                        <div class="code-label">no-mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">colorPickerCoupled.addEventListener("change", (e) => {
+    const color = e.target.value;
+    // El gradiente se aplica directamente al DOM sin sincronización
+    const gradient = `linear-gradient(135deg, ${color}, #ffa500)`;
+    gradientBoxCoupled.style.background = gradient;
+    colorDisplayCoupled.innerText = color;
+    // Si el contenedor se reconstruye, el color se pierde
+});</code></pre>
+                    </div>
+                    <div>
+                        <div class="code-label">mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">colorPickerMvc.addEventListener("change", (e) => {
+    // El color se sincroniza primero en el Modelo
+    appState.s6.color = e.target.value;
+    renderizarS6();
+});
+
+function renderizarS6() {
+    const gradient = `linear-gradient(135deg, ${appState.s6.color}, #4ec9b0)`;
+    gradientBoxMvc.style.background = gradient;
+    colorDisplayMvc.innerText = appState.s6.color;
+}</code></pre>
+                    </div>
+                </div>
+                <div class="analysis-block">
+                    <p><strong>Explicación:</strong> Sin un Modelo centralizado, cambios visuales como gradientes y colores quedan atrapados en el estilo inline del DOM. Si la interfaz se reconstruye o se resetea, esa información desaparece. Centralizar el estado en memoria garantiza que cualquier mutación visual sea reversible y recuperable.</p>
+                </div>
+            </details>
+        </section>
+
+        <!-- ESCENARIO 07 -->
+        <section class="section" id="escenario7">
+            <div class="section-badge">07 // INTERFAZ VISUAL COMPLEJA: LISTA EDITABLE</div>
+            <h2>Gestión de Lista Editable con Sincronización</h2>
+            <p class="description">
+                Construir interfaces dinámicas con listas que se pueden añadir, eliminar y editar es complicado sin un Modelo. En la versión acoplada, si intentas recuperar los elementos de la lista leyendo el DOM, cambios en el HTML pueden perder datos. Con el Modelo en memoria, cada elemento de la lista está sincronizado con su representación visual, permitiendo operaciones seguras como edición inline, eliminación y reordenamiento sin corrupción de datos.
+            </p>
+            
+            <div class="grid">
+                <div class="panel panel-no-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="control-group">
+                            <label class="form-label">Añadir elemento:</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="inputListCoupled" class="input" placeholder="Nuevo elemento..." style="flex: 1; margin: 0;">
+                                <button id="btnAddListCoupled" class="btn btn-primary" style="width: auto; flex-shrink: 0;">+</button>
+                            </div>
+                        </div>
+                        <div class="sandbox" style="min-height: 120px; overflow-y: auto;">
+                            <ul id="listContainerCoupled" style="list-style: none; padding: 8px; margin: 0;">
+                            </ul>
+                        </div>
+                        <div class="sandbox-action">
+                            <button id="btnS7ClearCoupled" class="btn btn-secondary">Vaciar lista</button>
+                            <div class="payload-box">Elementos: <span id="countCoupled" class="code-inline">0</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="panel panel-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="control-group">
+                            <label class="form-label">Añadir elemento:</label>
+                            <div style="display: flex; gap: 8px;">
+                                <input type="text" id="inputListMvc" class="input" placeholder="Nuevo elemento..." style="flex: 1; margin: 0;">
+                                <button id="btnAddListMvc" class="btn btn-primary" style="width: auto; flex-shrink: 0;">+</button>
+                            </div>
+                        </div>
+                        <div class="sandbox" style="min-height: 120px; overflow-y: auto;">
+                            <ul id="listContainerMvc" style="list-style: none; padding: 8px; margin: 0;">
+                            </ul>
+                        </div>
+                        <div class="sandbox-action">
+                            <button id="btnS7ClearMvc" class="btn btn-secondary">Vaciar lista</button>
+                            <div class="payload-box">Elementos: <span id="countMvc" class="code-inline">0</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <details class="code-details">
+                <summary class="flex-center">
+                    <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                    Código fuente de comparación
+                </summary>
+                <div class="code-grid">
+                    <div>
+                        <div class="code-label">no-mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">btnAddListCoupled.addEventListener("click", () => {
+    const texto = inputListCoupled.value;
+    if (!texto) return;
+    
+    // Añade directamente al DOM sin sincronización
+    const li = document.createElement("li");
+    li.innerHTML = `${texto} 
+        &lt;button onclick="this.parentNode.remove()"&gt;×&lt;/button&gt;`;
+    listContainerCoupled.appendChild(li);
+    
+    // El contador se calcula leyendo el DOM cada vez
+    countCoupled.innerText = listContainerCoupled.children.length;
+    inputListCoupled.value = "";
+});</code></pre>
+                    </div>
+                    <div>
+                        <div class="code-label">mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">btnAddListMvc.addEventListener("click", () => {
+    const texto = inputListMvc.value;
+    if (!texto) return;
+    
+    // Añade primero al Modelo
+    appState.s7.items.push({ id: Date.now(), text: texto });
+    renderizarListaMvc();
+    inputListMvc.value = "";
+});
+
+function renderizarListaMvc() {
+    listContainerMvc.innerHTML = appState.s7.items
+        .map(item => `&lt;li&gt;${item.text} 
+            &lt;button data-id="${item.id}"&gt;×&lt;/button&gt;&lt;/li&gt;`)
+        .join("");
+    countMvc.innerText = appState.s7.items.length;
+}</code></pre>
+                    </div>
+                </div>
+                <div class="analysis-block">
+                    <p><strong>Explicación:</strong> Manipular directamente el DOM sin un Modelo centralizado causa problemas cuando necesitas realizar búsquedas, filtrados o ediciones. Cada operación requiere leer del DOM, lo que es frágil y propenso a errores. Con un Modelo, todas las operaciones son seguras y predecibles.</p>
+                </div>
+            </details>
+        </section>
     </div>
 
     <!-- Consola -->

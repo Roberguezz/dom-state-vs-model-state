@@ -27,6 +27,19 @@ const btnS4ClearCoupled = document.getElementById("btnS4ClearCoupled");
 const totalDmgCoupled = document.getElementById("totalDmgCoupled");
 const dummySpriteCoupled = document.getElementById("dummySpriteCoupled");
 
+// Escenario 6: Selector de colores
+const colorPickerCoupled = document.getElementById("colorPickerCoupled");
+const gradientBoxCoupled = document.getElementById("gradientBoxCoupled");
+const colorDisplayCoupled = document.getElementById("colorDisplayCoupled");
+const btnS6ResetCoupled = document.getElementById("btnS6ResetCoupled");
+
+// Escenario 7: Lista editable
+const inputListCoupled = document.getElementById("inputListCoupled");
+const btnAddListCoupled = document.getElementById("btnAddListCoupled");
+const listContainerCoupled = document.getElementById("listContainerCoupled");
+const btnS7ClearCoupled = document.getElementById("btnS7ClearCoupled");
+const countCoupled = document.getElementById("countCoupled");
+
 const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
                      <input type="text" id="inputNombreCoupled" class="input" placeholder="Ej. Carlos Mendoza">`;
 const HTML_STEP_2 = `<label class="form-label">Número Telefónico Corporativo:</label>
@@ -51,6 +64,12 @@ function reiniciarTodo() {
     totalDmgCoupled.innerText = "0";
     dummySpriteCoupled.innerText = "(*'-'*)";
     dummySpriteCoupled.style.color = "var(--text-dark)";
+    colorPickerCoupled.value = "#ff6b6b";
+    gradientBoxCoupled.style.background = "linear-gradient(135deg, #ff6b6b, #ffa500)";
+    colorDisplayCoupled.innerText = "#ff6b6b";
+    listContainerCoupled.innerHTML = "";
+    countCoupled.innerText = "0";
+    inputListCoupled.value = "";
     irAPaso1();
 }
 
@@ -189,6 +208,54 @@ btnS4ClearCoupled.addEventListener("click", () => {
     dummySpriteCoupled.innerText = "(*'-'*)";
     dummySpriteCoupled.style.color = "var(--text-dark)";
     telemetryLog.innerText = "[DOM] Muñeco de pruebas restablecido en el DOM. Marcador reseteado a 0.";
+});
+
+// Escenario 6: Selector de colores (acoplado)
+colorPickerCoupled.addEventListener("change", (e) => {
+    const color = e.target.value;
+    const gradient = `linear-gradient(135deg, ${color}, #ffa500)`;
+    gradientBoxCoupled.style.background = gradient;
+    colorDisplayCoupled.innerText = color;
+    telemetryLog.innerText = `[DOM] Gradiente modificado directamente en el DOM sin sincronización con estado externo.`;
+});
+
+btnS6ResetCoupled.addEventListener("click", () => {
+    colorPickerCoupled.value = "#ff6b6b";
+    const gradient = "linear-gradient(135deg, #ff6b6b, #ffa500)";
+    gradientBoxCoupled.style.background = gradient;
+    colorDisplayCoupled.innerText = "#ff6b6b";
+    telemetryLog.innerText = "[DOM] Gradiente restablecido a valor por defecto en el DOM.";
+});
+
+// Escenario 7: Lista editable (acoplada)
+btnAddListCoupled.addEventListener("click", () => {
+    const texto = inputListCoupled.value.trim();
+    if (!texto) {
+        telemetryLog.innerText = "[DOM] Campo vacío. No se añadió elemento.";
+        return;
+    }
+
+    const li = document.createElement("li");
+    li.style.cssText = "display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;";
+    li.innerHTML = `<span>${texto}</span><button class="btn-delete-coupled" style="background: none; border: none; color: var(--flat-red); cursor: pointer; font-weight: bold; padding: 0 4px;">×</button>`;
+    
+    const deleteBtn = li.querySelector(".btn-delete-coupled");
+    deleteBtn.addEventListener("click", () => {
+        li.remove();
+        countCoupled.innerText = listContainerCoupled.children.length;
+        telemetryLog.innerText = `[DOM] Elemento eliminado directamente del DOM. Total: ${listContainerCoupled.children.length}`;
+    });
+
+    listContainerCoupled.appendChild(li);
+    countCoupled.innerText = listContainerCoupled.children.length;
+    inputListCoupled.value = "";
+    telemetryLog.innerText = `[DOM] Elemento añadido directamente al DOM. Total: ${listContainerCoupled.children.length}`;
+});
+
+btnS7ClearCoupled.addEventListener("click", () => {
+    listContainerCoupled.innerHTML = "";
+    countCoupled.innerText = "0";
+    telemetryLog.innerText = "[DOM] Lista vaciada en el DOM.";
 });
 
 btnResetAll.addEventListener("click", reiniciarTodo);

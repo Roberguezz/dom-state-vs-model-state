@@ -25,6 +25,19 @@ const btnS4ClearMvc = document.getElementById("btnS4ClearMvc");
 const totalDmgMvc = document.getElementById("totalDmgMvc");
 const dummySpriteMvc = document.getElementById("dummySpriteMvc");
 
+// Escenario 6: Selector de colores y gradientes
+const colorPickerMvc = document.getElementById("colorPickerMvc");
+const gradientBoxMvc = document.getElementById("gradientBoxMvc");
+const colorDisplayMvc = document.getElementById("colorDisplayMvc");
+const btnS6ResetMvc = document.getElementById("btnS6ResetMvc");
+
+// Escenario 7: Lista editable
+const inputListMvc = document.getElementById("inputListMvc");
+const btnAddListMvc = document.getElementById("btnAddListMvc");
+const listContainerMvc = document.getElementById("listContainerMvc");
+const btnS7ClearMvc = document.getElementById("btnS7ClearMvc");
+const countMvc = document.getElementById("countMvc");
+
 const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
                      <input type="text" id="inputNombreMvc" name="nombre" class="input" placeholder="Ej. Carlos Mendoza">`;
 const HTML_STEP_2 = `<label class="form-label">Número Telefónico Corporativo:</label>
@@ -36,6 +49,8 @@ const appState = {
     s2: { saldoEuros: 0.0, divisa: "EUR" },
     s3: { pasoActual: 1, formulario: { nombre: "", telefono: "" } },
     s4: { damage: 0, lastHitTime: 0, isCombo: false },
+    s6: { color: "#6bcf7f" },
+    s7: { items: [] },
     tasas: { EUR: 1.0, USD: 1.10, JPY: 160.0 }
 };
 
@@ -44,9 +59,13 @@ function resetearEstructura() {
     appState.s2 = { saldoEuros: 0.0, divisa: "EUR" };
     appState.s3 = { pasoActual: 1, formulario: { nombre: "", telefono: "" } };
     appState.s4 = { damage: 0, lastHitTime: 0, isCombo: false };
+    appState.s6 = { color: "#6bcf7f" };
+    appState.s7 = { items: [] };
     selectS2Mvc.value = "EUR";
     wrapperMvc.style.width = "100px";
     previewMvc.innerText = "null";
+    colorPickerMvc.value = "#6bcf7f";
+    inputListMvc.value = "";
     renderizar();
 }
 
@@ -87,6 +106,31 @@ function renderizar() {
         dummySpriteMvc.innerText = appState.s4.damage > 0 ? "(*o* )" : "(*'-'*)";
         dummySpriteMvc.style.color = "var(--text-dark)";
     }
+
+    // Escenario 6: Gradiente de color
+    const gradient = `linear-gradient(135deg, ${appState.s6.color}, #4ec9b0)`;
+    gradientBoxMvc.style.background = gradient;
+    colorDisplayMvc.innerText = appState.s6.color;
+
+    // Escenario 7: Lista editable
+    renderizarListaMvc();
+}
+
+function renderizarListaMvc() {
+    listContainerMvc.innerHTML = appState.s7.items
+        .map((item, index) => `<li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;"><span>${item.text}</span><button data-index="${index}" class="btn-delete-item" style="background: none; border: none; color: var(--flat-red); cursor: pointer; font-weight: bold; padding: 0 4px;">×</button></li>`)
+        .join("");
+    countMvc.innerText = appState.s7.items.length;
+
+    // Añadir listeners a los botones de eliminar
+    listContainerMvc.querySelectorAll(".btn-delete-item").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+            const index = parseInt(e.target.getAttribute("data-index"));
+            appState.s7.items.splice(index, 1);
+            renderizarListaMvc();
+            telemetryLog.innerText = `[MVC] Elemento eliminado de la lista. Total: ${appState.s7.items.length}`;
+        });
+    });
 }
 
 // CONTROLADOR: Gestores de eventos
@@ -162,6 +206,39 @@ btnS4ClearMvc.addEventListener("click", () => {
     appState.s4.lastHitTime = 0;
     appState.s4.isCombo = false;
     telemetryLog.innerText = "[MVC] Muñeco de pruebas restablecido en el Modelo. Daño en memoria puesto a 0.";
+    renderizar();
+});
+
+// Controladores del Escenario 6 (Selector de colores)
+colorPickerMvc.addEventListener("change", (e) => {
+    appState.s6.color = e.target.value;
+    telemetryLog.innerText = `[MVC] Color seleccionado sincronizado en el Modelo: ${appState.s6.color}`;
+    renderizar();
+});
+
+btnS6ResetMvc.addEventListener("click", () => {
+    appState.s6.color = "#6bcf7f";
+    colorPickerMvc.value = "#6bcf7f";
+    telemetryLog.innerText = "[MVC] Gradiente restablecido al color por defecto en el Modelo.";
+    renderizar();
+});
+
+// Controladores del Escenario 7 (Lista editable)
+btnAddListMvc.addEventListener("click", () => {
+    const texto = inputListMvc.value.trim();
+    if (!texto) {
+        telemetryLog.innerText = "[MVC] Campo vacío. No se añadió elemento.";
+        return;
+    }
+    appState.s7.items.push({ id: Date.now(), text: texto });
+    inputListMvc.value = "";
+    telemetryLog.innerText = `[MVC] Elemento añadido a la lista en el Modelo. Total: ${appState.s7.items.length}`;
+    renderizar();
+});
+
+btnS7ClearMvc.addEventListener("click", () => {
+    appState.s7.items = [];
+    telemetryLog.innerText = "[MVC] Lista vaciada en el Modelo.";
     renderizar();
 });
 

@@ -676,30 +676,30 @@ details[open] .icon-toggle {
     line-height: 1.5;
     background: none !important;
     padding: 0 !important;
-    color: #d4d4d4 !important; /* Color base: toda la plantilla sale visible */
+    color: #e8e8e8 !important; /* Color base: toda la plantilla sale visible */
 }
 
-/* Tokens de Prism — paleta VS Code Dark */
-.code-grid .token.keyword    { color: #c586c0 !important; font-weight: 600; }
-.code-grid .token.comment    { color: #6a9955 !important; font-style: italic; }
-.code-grid .token.string     { color: #ce9178 !important; }
-.code-grid .token.template-string { color: #ce9178 !important; }
-.code-grid .token.template-punctuation { color: #ce9178 !important; }
-.code-grid .token.interpolation { color: #d4d4d4 !important; }
-.code-grid .token.number     { color: #b5cea8 !important; }
-.code-grid .token.boolean    { color: #569cd6 !important; }
-.code-grid .token.constant   { color: #9cdcfe !important; }
-.code-grid .token.function   { color: #dcdcaa !important; }
-.code-grid .token.method     { color: #dcdcaa !important; }
-.code-grid .token.property   { color: #9cdcfe !important; }
-.code-grid .token.operator   { color: #d4d4d4 !important; }
-.code-grid .token.punctuation { color: #d4d4d4 !important; }
-.code-grid .token.class-name { color: #4ec9b0 !important; }
-.code-grid .token.parameter  { color: #9cdcfe !important; }
-.code-grid .token.variable   { color: #9cdcfe !important; }
-.code-grid .token.attr-name  { color: #9cdcfe !important; }
-.code-grid .token.builtin    { color: #4ec9b0 !important; }
-.code-grid .token.regex      { color: #d16969 !important; }
+/* Tokens de Prism — paleta VS Code Dark (colores más saturados y legibles) */
+.code-grid .token.keyword    { color: #e06ce0 !important; font-weight: 600; }
+.code-grid .token.comment    { color: #7ec699 !important; font-style: italic; }
+.code-grid .token.string     { color: #e8b87a !important; }
+.code-grid .token.template-string { color: #e8b87a !important; }
+.code-grid .token.template-punctuation { color: #e8b87a !important; }
+.code-grid .token.interpolation { color: #e8e8e8 !important; }
+.code-grid .token.number     { color: #d0e896 !important; }
+.code-grid .token.boolean    { color: #6db8ff !important; }
+.code-grid .token.constant   { color: #b5d8ff !important; }
+.code-grid .token.function   { color: #ffef7e !important; }
+.code-grid .token.method     { color: #ffef7e !important; }
+.code-grid .token.property   { color: #b5d8ff !important; }
+.code-grid .token.operator   { color: #e8e8e8 !important; }
+.code-grid .token.punctuation { color: #e8e8e8 !important; }
+.code-grid .token.class-name { color: #5ef3d6 !important; }
+.code-grid .token.parameter  { color: #b5d8ff !important; }
+.code-grid .token.variable   { color: #b5d8ff !important; }
+.code-grid .token.attr-name  { color: #b5d8ff !important; }
+.code-grid .token.builtin    { color: #5ef3d6 !important; }
+.code-grid .token.regex      { color: #ff8080 !important; }
 
 /* --- BARRA DE LOGS / CONSOLA SIMPLE --- */
 .telemetry-bar {
