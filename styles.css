@@ -157,6 +157,38 @@ body {
     margin-bottom: 12px;
 }
 
+.section-header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.section-header-flex h2 {
+    margin-bottom: 0;
+}
+
+.btn-reset-scenario {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--font-body);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.btn-reset-scenario:hover {
+    background: var(--bg-inner);
+    color: var(--text-dark);
+}
+
 .description {
     color: var(--text-muted);
     font-size: 0.95rem;
@@ -447,6 +479,14 @@ body {
 
 .text-green {
     color: var(--flat-green);
+}
+
+.minion-item {
+    transition: opacity 2s ease;
+}
+
+.minion-fade {
+    opacity: 0.3 !important;
 }
 
 /* --- ELEMENTOS DE FORMULARIO --- */

@@ -20,19 +20,16 @@
             <h1>Separación de Vista y Modelo</h1>
             <p class="lead">Ejemplos prácticos e interactivos que demuestran por qué mantener el estado de la aplicación en el DOM dificulta el mantenimiento, y cómo delegar la lógica de negocio a un Modelo en memoria soluciona este problema de diseño.</p>
             <div class="global-actions">
-                <button id="btnResetAll" class="btn btn-secondary flex-center">
-                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
-                    </svg>
-                    Restablecer estado
-                </button>
             </div>
         </header>
 
         <!-- ESCENARIO 01 -->
         <section class="section" id="escenario1">
             <div class="section-badge">01 // DIMENSIONAMIENTO DEL CONTENEDOR</div>
-            <h2>Escala Física del Contenedor</h2>
+            <div class="section-header-flex">
+                <h2>Escala Física del Contenedor</h2>
+                <button class="btn-reset-scenario" id="resetS1">↻ Reset</button>
+            </div>
             <p class="description">
                 Cuando se cambia el tamaño de un componente de interfaz en el DOM, es un error de diseño calcular su progreso leyendo el ancho físico del contenedor en píxeles. Si el contenedor se redimensiona, la lógica matemática ligada a las dimensiones físicas de pantalla se rompe. Con una vista desacoplada, mantenemos el progreso en un porcentaje matemático puro en memoria (Modelo) y dejamos que el DOM se limite a pintarlo de forma responsiva.
             </p>
@@ -121,7 +118,10 @@ barMvc.style.width = appState.s1.progreso + "%";</code></pre>
         <!-- ESCENARIO 02 -->
         <section class="section" id="escenario2">
             <div class="section-badge">02 // INTEGRIDAD DE DATOS</div>
-            <h2>Conversión Dinámica de Divisas</h2>
+            <div class="section-header-flex">
+                <h2>Conversión Dinámica de Divisas</h2>
+                <button class="btn-reset-scenario" id="resetS2">↻ Reset</button>
+            </div>
             <p class="description">
                 Intentar recuperar valores leyendo el texto visible en las etiquetas del DOM es una práctica frágil. Al dar formato a las monedas o cambiar a divisas como dólares ($) o yenes (¥), las funciones de parseo y limpieza de texto fallan, inyectando un valor de número inválido (NaN). Mantener el estado financiero puro en el Modelo garantiza que las sumas y las conversiones siempre operen sobre números correctos.
             </p>
@@ -209,7 +209,10 @@ totalMvc.innerText = formatear(totalCalculado, divisaActiva);</code></pre>
         <!-- ESCENARIO 03 -->
         <section class="section" id="escenario3">
             <div class="section-badge">03 // CICLO DE VIDA DE NODOS</div>
-            <h2>Persistencia e inputs Dinámicos</h2>
+            <div class="section-header-flex">
+                <h2>Persistencia e inputs Dinámicos</h2>
+                <button class="btn-reset-scenario" id="resetS3">↻ Reset</button>
+            </div>
             <p class="description">
                 Al alternar o recrear secciones HTML dinámicamente en aplicaciones frontend, confiar el estado a los inputs del DOM provoca la pérdida irreversible de los datos en cuanto el nodo se desmonta o destruye del árbol del navegador. Centralizar las entradas en un Modelo en memoria asegura que la información permanezca persistente e independiente del ciclo de vida o renderizado de la interfaz. Escribe un nombre en el paso 1, avanza al paso 2 y regresa: el input acoplado se habrá borrado.
             </p>
@@ -302,7 +305,10 @@ function renderPaso1() {
         <!-- ESCENARIO 04 -->
         <section class="section" id="escenario4">
             <div class="section-badge">04 // COMBATE RPG Y MULTIPLICADOR DE COMBO</div>
-            <h2>Combate RPG y Multiplicador de Combo</h2>
+            <div class="section-header-flex">
+                <h2>Combate RPG y Multiplicador de Combo</h2>
+                <button class="btn-reset-scenario" id="resetS4">↻ Reset</button>
+            </div>
             <p class="description">
                 Al encadenar golpes rápidos, el sistema activa un multiplicador de combo que escribe en el marcador el texto <code>"¡COMBO! 120"</code>. En la versión acoplada al DOM, el código recupera el total acumulado leyendo ese texto de la pantalla e intenta parsearlo numéricamente. Al procesar una cadena con letras, <code>parseFloat</code> devuelve <code>NaN</code>, corrompiendo el marcador de forma irrecuperable. Con el Modelo en memoria, el acumulado numérico permanece intacto independientemente de cómo lo muestre la vista.
             </p>
@@ -391,10 +397,13 @@ if (appState.s4.isCombo) {
 
         <!-- ESCENARIO 05 -->
         <section class="section" id="escenario5">
-            <div class="section-badge">05 // PULSADOR DE ATAQUE MÚLTIPLE RÁPIDO</div>
-            <h2>Contador de Golpes Acelerados</h2>
+            <div class="section-badge">05 // MANEJO DE TIPOS (NUMBER VS STRING)</div>
+            <div class="section-header-flex">
+                <h2>Sistema de Niveles (Data Attributes)</h2>
+                <button class="btn-reset-scenario" id="resetS5">↻ Reset</button>
+            </div>
             <p class="description">
-                Cuando intentas registrar múltiples eventos rápidamente (como clicks spam en un botón de ataque), el código acoplado al DOM pierde referencias de cuántos golpes reales se han generado porque solo ve el último valor renderizado. Al cambiar el multiplicador rápidamente, la versión acoplada pierde sincronización y el contador se vuelve impredecible. En la versión MVC, cada evento se suma al estado centralizado, manteniendo un registro exacto de todos los golpes, sin importar la velocidad de interacción.
+                Guardar variables numéricas (como el nivel de un personaje) en atributos del DOM (ej. <code>data-level="1"</code>) fuerza que los datos se conviertan a <strong>Strings</strong>. Si intentas sumar 1 matemáticamente leyendo el DOM, JavaScript interpretará <code>"1" + 1</code> dando como resultado <code>"11"</code>. MVC guarda el dato como un <strong>Number</strong> puro en memoria, por lo que <code>1 + 1 = 2</code> garantizado.
             </p>
 
             <div class="grid">
@@ -403,23 +412,11 @@ if (appState.s4.isCombo) {
                         <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
-                        <div class="control-group">
-                            <label class="form-label">Multiplicador de daño:</label>
-                            <div class="control-row">
-                                <input type="range" id="sliderS5Coupled" min="1" max="3" value="1" class="custom-slider">
-                                <span id="labelS5Coupled" class="badge">x1</span>
-                            </div>
-                        </div>
-                        <div class="sandbox" style="min-height: 120px;">
-                            <div class="metric">Golpes registrados: <span id="hitCountCoupled" class="counter text-red">0</span></div>
-                            <div class="metric">Daño total acumulado: <span id="totalHitsCoupled" class="counter text-red">0</span></div>
-                            <div style="margin-top: 12px; padding: 8px; background: var(--bg-main); border-radius: 4px; font-size: 0.8rem; color: var(--text-muted);">
-                                <span>Historial: <span id="hitLogCoupled" style="font-family: var(--font-mono); color: var(--flat-red);">—</span></span>
-                            </div>
+                        <div class="sandbox flex-center" style="min-height: 100px;">
+                            <div id="heroLevelCoupled" class="total-display text-red" data-level="1">Nivel: 1</div>
                         </div>
                         <div class="form-actions">
-                            <button id="btnS5Coupled" class="btn btn-primary">¡Golpe Rápido! (+10)</button>
-                            <button id="btnS5ClearCoupled" class="btn btn-secondary">Limpiar</button>
+                            <button id="btnS5Coupled" class="btn btn-primary">Ganar 100 XP (+1 Nivel)</button>
                         </div>
                     </div>
                 </div>
@@ -429,23 +426,11 @@ if (appState.s4.isCombo) {
                         <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
-                        <div class="control-group">
-                            <label class="form-label">Multiplicador de daño:</label>
-                            <div class="control-row">
-                                <input type="range" id="sliderS5Mvc" min="1" max="3" value="1" class="custom-slider">
-                                <span id="labelS5Mvc" class="badge">x1</span>
-                            </div>
-                        </div>
-                        <div class="sandbox" style="min-height: 120px;">
-                            <div class="metric">Golpes registrados: <span id="hitCountMvc" class="counter text-green">0</span></div>
-                            <div class="metric">Daño total acumulado: <span id="totalHitsMvc" class="counter text-green">0</span></div>
-                            <div style="margin-top: 12px; padding: 8px; background: var(--bg-main); border-radius: 4px; font-size: 0.8rem; color: var(--text-muted);">
-                                <span>Historial: <span id="hitLogMvc" style="font-family: var(--font-mono); color: var(--flat-green);">—</span></span>
-                            </div>
+                        <div class="sandbox flex-center" style="min-height: 100px;">
+                            <div id="heroLevelMvc" class="total-display text-green">Nivel: 1</div>
                         </div>
                         <div class="form-actions">
-                            <button id="btnS5Mvc" class="btn btn-primary">¡Golpe Rápido! (+10)</button>
-                            <button id="btnS5ClearMvc" class="btn btn-secondary">Limpiar</button>
+                            <button id="btnS5Mvc" class="btn btn-primary">Ganar 100 XP (+1 Nivel)</button>
                         </div>
                     </div>
                 </div>
@@ -461,50 +446,36 @@ if (appState.s4.isCombo) {
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">btnS5Coupled.addEventListener("click", () => {
-    const mult = parseInt(sliderS5Coupled.value);
-    const damage = 10 * mult;
-    
-    // Lee el total actual del DOM (no-mvc)
-    let currentTotal = parseInt(totalHitsCoupled.innerText) || 0;
-    let newTotal = currentTotal + damage;
-    
-    // Escribe directamente sin sincronización de datos
-    totalHitsCoupled.innerText = newTotal;
-    hitCountCoupled.innerText = parseInt(hitCountCoupled.innerText) + 1;
-    
-    // El historial se sobreescribe, perdiendo eventos rápidos
-    hitLogCoupled.innerText = hitLogCoupled.innerText + ` ${damage}`;
-});</code></pre>
+                        <pre class="language-javascript"><code class="language-javascript">// Lee del atributo del DOM, obteniendo un String "1"
+let lvl = heroLevelCoupled.getAttribute("data-level");
+
+// "1" + 1 concatena, dando "11"
+let nextLvl = lvl + 1; 
+
+heroLevelCoupled.setAttribute("data-level", nextLvl);
+heroLevelCoupled.innerText = "Nivel: " + nextLvl;</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">btnS5Mvc.addEventListener("click", () => {
-    const mult = parseInt(sliderS5Mvc.value);
-    const damage = 10 * mult;
-    
-    // Todos los datos se guardan en el Modelo
-    appState.s5.hitCount++;
-    appState.s5.totalDamage += damage;
-    appState.s5.hits.push(damage);
-    
-    // La vista refleja siempre el estado exacto del Modelo
-    renderizar();
-});</code></pre>
+                        <pre class="language-javascript"><code class="language-javascript">// Suma matemáticamente un Number puro en memoria
+appState.s5.level += 1;
+
+// La vista solo formatea e inyecta
+heroLevelMvc.innerText = "Nivel: " + appState.s5.level;</code></pre>
                     </div>
-                </div>
-                <div class="analysis-block">
-                    <p><strong>Explicación:</strong> Cuando haces click muy rápido, el código acoplado puede perder golpes porque solo lee el último valor visible en el DOM. Si cambias el multiplicador mientras ves el total, los cálculos se desincronizarán. Con el Modelo centralizado, cada golpe queda registrado perfectamente, independientemente de la velocidad de los clicks o los cambios en el multiplicador.</p>
                 </div>
             </details>
         </section>
 
         <!-- ESCENARIO 06 -->
         <section class="section" id="escenario6">
-            <div class="section-badge">06 // HISTORIAL DE CAMBIOS CON PERSISTENCIA</div>
-            <h2>Selector de Colores con Registro de Cambios</h2>
+            <div class="section-badge">06 // INTEGRIDAD DE DATOS FRENTE A CAMBIOS VISUALES</div>
+            <div class="section-header-flex">
+                <h2>Cálculo de Peso del Botín</h2>
+                <button class="btn-reset-scenario" id="resetS6">↻ Reset</button>
+            </div>
             <p class="description">
-                Cambiar colores en la interfaz requiere mantener un historial de todos los cambios. En la versión acoplada, si necesitas grabar cada color seleccionado en un registro, el estado del input color picker no está sincronizado con el historial, lo que causa inconsistencias. Al recargar la página o resetear elementos, el historial puede perderse o desincronizarse. Con un Modelo centralizado, cada cambio se registra inmediatamente en memoria, garantizando que el historial y el color actual siempre estén sincronizados.
+                El código acoplado calcula el peso leyendo los textos del DOM (ej. "5 kg - Espada") y extrayendo el número. Si decides añadir un encantamiento visual que coloque un emoji al principio del texto (<code>✨ 5 kg - Espada</code>), la función de parseo numérico se rompe dando <code>NaN</code>. En MVC, el peso es una variable numérica protegida, por lo que puedes decorar la interfaz como quieras sin corromper la lógica.
             </p>
             
             <div class="grid">
@@ -513,18 +484,16 @@ if (appState.s4.isCombo) {
                         <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
-                        <div class="control-group">
-                            <label class="form-label">Selecciona un color:</label>
-                            <input type="color" id="colorPickerCoupled" class="input" value="#ff6b6b" style="height: 40px; cursor: pointer;">
+                        <div class="sandbox" style="min-height: 120px;">
+                            <ul id="lootCoupled" style="list-style: none; padding: 0;">
+                                <li>5 kg - Espada Larga</li>
+                                <li>3 kg - Escudo de Madera</li>
+                            </ul>
+                            <div class="metric" style="margin-top: 15px; text-align: right;">Peso Total: <span id="weightCoupled" class="counter text-red">8</span> kg</div>
                         </div>
-                        <div class="sandbox" id="gradientBoxCoupled" style="background: linear-gradient(135deg, #ff6b6b, #ffa500); min-height: 120px; border-radius: 4px; transition: background 0.3s;">
-                        </div>
-                        <div class="sandbox-action">
-                            <button id="btnS6ResetCoupled" class="btn btn-secondary">Limpiar Todo</button>
-                            <div class="payload-box">Cambios registrados: <span id="colorCountCoupled" class="code-inline">0</span></div>
-                            <div class="payload-box" style="margin-top: 8px; font-size: 0.75rem; max-height: 60px; overflow-y: auto;">
-                                Historial: <span id="colorHistoryCoupled" class="code-inline" style="display: block; margin-top: 4px; word-break: break-all;">—</span>
-                            </div>
+                        <div class="form-actions">
+                            <button id="btnS6AddCoupled" class="btn btn-secondary">Añadir Manzana (1 kg)</button>
+                            <button id="btnS6EnchantCoupled" class="btn btn-primary">Aplicar Encantamiento ✨</button>
                         </div>
                     </div>
                 </div>
@@ -534,18 +503,14 @@ if (appState.s4.isCombo) {
                         <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
-                        <div class="control-group">
-                            <label class="form-label">Selecciona un color:</label>
-                            <input type="color" id="colorPickerMvc" class="input" value="#6bcf7f" style="height: 40px; cursor: pointer;">
+                        <div class="sandbox" style="min-height: 120px;">
+                            <ul id="lootMvc" style="list-style: none; padding: 0;">
+                            </ul>
+                            <div class="metric" style="margin-top: 15px; text-align: right;">Peso Total: <span id="weightMvc" class="counter text-green">8</span> kg</div>
                         </div>
-                        <div class="sandbox" id="gradientBoxMvc" style="background: linear-gradient(135deg, #6bcf7f, #4ec9b0); min-height: 120px; border-radius: 4px; transition: background 0.3s;">
-                        </div>
-                        <div class="sandbox-action">
-                            <button id="btnS6ResetMvc" class="btn btn-secondary">Limpiar Todo</button>
-                            <div class="payload-box">Cambios registrados: <span id="colorCountMvc" class="code-inline">0</span></div>
-                            <div class="payload-box" style="margin-top: 8px; font-size: 0.75rem; max-height: 60px; overflow-y: auto;">
-                                Historial: <span id="colorHistoryMvc" class="code-inline" style="display: block; margin-top: 4px; word-break: break-all;">—</span>
-                            </div>
+                        <div class="form-actions">
+                            <button id="btnS6AddMvc" class="btn btn-secondary">Añadir Manzana (1 kg)</button>
+                            <button id="btnS6EnchantMvc" class="btn btn-primary">Aplicar Encantamiento ✨</button>
                         </div>
                     </div>
                 </div>
@@ -561,49 +526,35 @@ if (appState.s4.isCombo) {
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">let colorHistoryCoupledData = [];
-
-colorPickerCoupled.addEventListener("change", (e) => {
-    const color = e.target.value;
-    const gradient = `linear-gradient(135deg, ${color}, #ffa500)`;
-    gradientBoxCoupled.style.background = gradient;
-    
-    // Intenta registrar en el historial leyendo el DOM
-    let history = colorHistoryCoupled.innerText || "—";
-    history = history === "—" ? color : history + ", " + color;
-    colorHistoryCoupled.innerText = history;
-    colorCountCoupled.innerText = parseInt(colorCountCoupled.innerText) + 1;
-    // Si recargas, el historial se pierde
-});</code></pre>
+                        <pre class="language-javascript"><code class="language-javascript">let total = 0;
+// Itera los textos del DOM
+Array.from(lootCoupled.children).forEach(li => {
+    // Si el texto es "✨ 5 kg - Espada", parseInt falla
+    total += parseInt(li.innerText);
+});
+weightCoupled.innerText = total; // Resultado: NaN</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">colorPickerMvc.addEventListener("change", (e) => {
-    // Registra en el Modelo (nunca se pierde)
-    appState.s6.color = e.target.value;
-    appState.s6.colorHistory.push(e.target.value);
-    
-    const gradient = `linear-gradient(135deg, ${appState.s6.color}, #4ec9b0)`;
-    gradientBoxMvc.style.background = gradient;
-    
-    // La vista refleja siempre el Modelo
-    colorHistoryMvc.innerText = appState.s6.colorHistory.join(", ");
-    colorCountMvc.innerText = appState.s6.colorHistory.length;
-});</code></pre>
+                        <pre class="language-javascript"><code class="language-javascript">// El peso se calcula leyendo los objetos puros del array
+let total = appState.s6.loot.reduce((acc, item) => acc + item.weight, 0);
+
+// El encantamiento solo muta el estado visual de los objetos
+appState.s6.loot.forEach(item => item.enchanted = true);</code></pre>
                     </div>
-                </div>
-                <div class="analysis-block">
-                    <p><strong>Explicación:</strong> Sin un Modelo, mantener un historial de cambios requiere manipular strings en el DOM, lo que es frágil. Cada operación depende de leer y escribir datos visuales. Con el Modelo centralizado, cada cambio se registra automáticamente en un array en memoria, garantizando que el historial sea exacto y recuperable, incluso después de recargas del DOM.</p>
                 </div>
             </details>
         </section>
 
         <!-- ESCENARIO 07 -->
         <section class="section" id="escenario7">
-            <div class="section-badge">07 // LISTA CON VALIDACIÓN DE CONTEO</div>
-            <h2>Gestión de Lista con Contador Sincronizado</h2>
+            <div class="section-badge">07 // INCONSISTENCIAS DE NODOS FANTASMA Y ANIMACIONES</div>
+            <div class="section-header-flex">
+                <h2>Invocación de Esbirros (Límite: 3)</h2>
+                <button class="btn-reset-scenario" id="resetS7">↻ Reset</button>
+            </div>
             <p class="description">
-                Construir interfaces dinámicas con listas es complicado sin un Modelo. En la versión acoplada, al eliminar elementos muy rápido, el contador que lee el DOM puede desincronizarse con los elementos visuales reales, causando que números y lista no coincidan. Con el Modelo en memoria, cada adición y eliminación actualiza un array en memoria, y el contador siempre refleja la verdad: la longitud del array en el Modelo, no lo que ve en el DOM.
+                El nigromante solo puede tener 3 esbirros a la vez. Cuando usa <strong>Desterrar</strong>, los esbirros tardan 2 segundos visuales en desvanecerse y morir. El código acoplado no te dejará crear nuevos esbirros durante la animación porque los "nodos fantasma" siguen ocupando espacio en el DOM y contabilizan en el límite. Con un Modelo centralizado, el array de esbirros se vacía al instante, permitiéndote invocar a los siguientes aunque los antiguos sigan desvaneciéndose visualmente.
             </p>
             
             <div class="grid">
@@ -612,24 +563,13 @@ colorPickerCoupled.addEventListener("change", (e) => {
                         <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
-                        <div class="control-group">
-                            <label class="form-label">Añadir elemento:</label>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="text" id="inputListCoupled" class="input" placeholder="Nuevo elemento..." style="flex: 1; margin: 0;">
-                                <button id="btnAddListCoupled" class="btn btn-primary" style="width: auto; flex-shrink: 0;">+</button>
-                            </div>
+                        <div class="metric">Esbirros Activos: <span id="countCoupled" class="counter text-red">0</span> / 3</div>
+                        <div class="sandbox" style="min-height: 80px; display: flex; gap: 8px; justify-content: center; align-items: center;" id="minionZoneCoupled">
+                            <!-- Esbirros aquí -->
                         </div>
-                        <div class="sandbox" style="min-height: 120px; overflow-y: auto;">
-                            <ul id="listContainerCoupled" style="list-style: none; padding: 8px; margin: 0;">
-                            </ul>
-                        </div>
-                        <div class="sandbox-action">
-                            <button id="btnS7ClearCoupled" class="btn btn-secondary">Vaciar lista</button>
-                            <div class="payload-box">Elementos en lista: <span id="countCoupled" class="code-inline">0</span></div>
-                            <div class="payload-box" style="margin-top: 8px; border: 1px solid var(--flat-red); background-color: rgba(185, 92, 80, 0.1); padding: 8px; border-radius: 4px;">
-                                <strong style="color: var(--flat-red);">⚠ Verificación:</strong> <span id="verifyCountCoupled" style="font-family: var(--font-mono); color: var(--flat-red);">0</span>
-                                <span id="verifyStatusCoupled" style="font-size: 0.75rem; color: var(--text-muted);"> — sincronizado</span>
-                            </div>
+                        <div class="form-actions">
+                            <button id="btnS7InvokeCoupled" class="btn btn-secondary">Invocar Esqueleto</button>
+                            <button id="btnS7BanishCoupled" class="btn btn-primary">Desterrar (Tarda 2s)</button>
                         </div>
                     </div>
                 </div>
@@ -639,24 +579,14 @@ colorPickerCoupled.addEventListener("change", (e) => {
                         <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
-                        <div class="control-group">
-                            <label class="form-label">Añadir elemento:</label>
-                            <div style="display: flex; gap: 8px;">
-                                <input type="text" id="inputListMvc" class="input" placeholder="Nuevo elemento..." style="flex: 1; margin: 0;">
-                                <button id="btnAddListMvc" class="btn btn-primary" style="width: auto; flex-shrink: 0;">+</button>
-                            </div>
+                        <div class="metric">Esbirros Activos: <span id="countMvc" class="counter text-green">0</span> / 3</div>
+                        <div class="sandbox" style="min-height: 80px; display: flex; gap: 8px; justify-content: center; align-items: center; position: relative;">
+                            <div id="minionZoneMvc" style="display: flex; gap: 8px;"></div>
+                            <div id="graveyardMvc" style="display: flex; gap: 8px; position: absolute; pointer-events: none;"></div>
                         </div>
-                        <div class="sandbox" style="min-height: 120px; overflow-y: auto;">
-                            <ul id="listContainerMvc" style="list-style: none; padding: 8px; margin: 0;">
-                            </ul>
-                        </div>
-                        <div class="sandbox-action">
-                            <button id="btnS7ClearMvc" class="btn btn-secondary">Vaciar lista</button>
-                            <div class="payload-box">Elementos en lista: <span id="countMvc" class="code-inline">0</span></div>
-                            <div class="payload-box" style="margin-top: 8px; border: 1px solid var(--flat-green); background-color: rgba(77, 124, 103, 0.1); padding: 8px; border-radius: 4px;">
-                                <strong style="color: var(--flat-green);">✓ Verificación:</strong> <span id="verifyCountMvc" style="font-family: var(--font-mono); color: var(--flat-green);">0</span>
-                                <span id="verifyStatusMvc" style="font-size: 0.75rem; color: var(--text-muted);"> — sincronizado</span>
-                            </div>
+                        <div class="form-actions">
+                            <button id="btnS7InvokeMvc" class="btn btn-secondary">Invocar Esqueleto</button>
+                            <button id="btnS7BanishMvc" class="btn btn-primary">Desterrar (Tarda 2s)</button>
                         </div>
                     </div>
                 </div>
@@ -672,36 +602,31 @@ colorPickerCoupled.addEventListener("change", (e) => {
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">btnAddListCoupled.addEventListener("click", () => {
-    // Añade al DOM sin estado sincronizado
-    const li = document.createElement("li");
-    li.innerHTML = `${texto} &lt;button&gt;×&lt;/button&gt;`;
-    listContainerCoupled.appendChild(li);
-    
-    // El contador se calcula leyendo el DOM
-    countCoupled.innerText = listContainerCoupled.children.length;
-    verifyCountCoupled.innerText = listContainerCoupled.children.length;
-    
-    // Si eliminas rápido, el contador se desincroniza
+                        <pre class="language-javascript"><code class="language-javascript">// BLOQUEADO: Lee los elementos físicos
+if (minionZoneCoupled.children.length >= 3) {
+    alert("¡Límite de esbirros alcanzado!"); 
+    return;
+}
+
+// DESTERRAR: Añade clase de animación y los borra a los 2s
+Array.from(zone.children).forEach(m => {
+    m.classList.add("fade-out");
+    setTimeout(() => m.remove(), 2000);
 });</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">btnAddListMvc.addEventListener("click", () => {
-    // Primero al Modelo
-    appState.s7.items.push({ id: Date.now(), text: texto });
-    
-    // La vista siempre refleja el Modelo
-    renderizarListaMvc();
-    
-    // El contador es siempre: appState.s7.items.length
-    countMvc.innerText = appState.s7.items.length;
-    verifyCountMvc.innerText = appState.s7.items.length;
-});</code></pre>
+                        <pre class="language-javascript"><code class="language-javascript">// LIBRE: Consulta el array puro
+if (appState.s7.minions.length >= 3) {
+    alert("¡Límite de esbirros alcanzado!");
+    return;
+}
+
+// DESTERRAR: Vacía la lógica al instante
+appState.s7.minions = [];
+// (La vista mueve los nodos viejos a un contenedor "fantasma" 
+// para la animación, pero el array ya está en 0)</code></pre>
                     </div>
-                </div>
-                <div class="analysis-block">
-                    <p><strong>Explicación:</strong> Al eliminar elementos muy rápido en la versión acoplada, el contador que lee <code>listContainerCoupled.children.length</code> puede no coincidir con la cantidad real de clicks de eliminación, creando inconsistencias visuales. Con el Modelo centralizado en un array, el contador siempre es exacto: la longitud del array es la fuente de verdad, no el DOM.</p>
                 </div>
             </details>
         </section>

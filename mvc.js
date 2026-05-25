@@ -1,5 +1,4 @@
 const telemetryLog = document.getElementById("telemetryMsg");
-const btnResetAll = document.getElementById("btnResetAll");
 
 // Escenario 1: Control de escala física
 const btnS1Mvc = document.getElementById("btnS1Mvc");
@@ -25,30 +24,22 @@ const btnS4ClearMvc = document.getElementById("btnS4ClearMvc");
 const totalDmgMvc = document.getElementById("totalDmgMvc");
 const dummySpriteMvc = document.getElementById("dummySpriteMvc");
 
-// Escenario 5: Hits rápidos
-const sliderS5Mvc = document.getElementById("sliderS5Mvc");
-const labelS5Mvc = document.getElementById("labelS5Mvc");
-const hitCountMvc = document.getElementById("hitCountMvc");
-const totalHitsMvc = document.getElementById("totalHitsMvc");
-const hitLogMvc = document.getElementById("hitLogMvc");
+// Escenario 5: Sistema de Niveles
 const btnS5Mvc = document.getElementById("btnS5Mvc");
-const btnS5ClearMvc = document.getElementById("btnS5ClearMvc");
+const heroLevelMvc = document.getElementById("heroLevelMvc");
 
-// Escenario 6: Selector de colores y gradientes
-const colorPickerMvc = document.getElementById("colorPickerMvc");
-const gradientBoxMvc = document.getElementById("gradientBoxMvc");
-const colorHistoryMvc = document.getElementById("colorHistoryMvc");
-const colorCountMvc = document.getElementById("colorCountMvc");
-const btnS6ResetMvc = document.getElementById("btnS6ResetMvc");
+// Escenario 6: Inventario de Botín
+const lootMvc = document.getElementById("lootMvc");
+const weightMvc = document.getElementById("weightMvc");
+const btnS6AddMvc = document.getElementById("btnS6AddMvc");
+const btnS6EnchantMvc = document.getElementById("btnS6EnchantMvc");
 
-// Escenario 7: Lista editable
-const inputListMvc = document.getElementById("inputListMvc");
-const btnAddListMvc = document.getElementById("btnAddListMvc");
-const listContainerMvc = document.getElementById("listContainerMvc");
-const btnS7ClearMvc = document.getElementById("btnS7ClearMvc");
+// Escenario 7: Invocación de Esbirros
 const countMvc = document.getElementById("countMvc");
-const verifyCountMvc = document.getElementById("verifyCountMvc");
-const verifyStatusMvc = document.getElementById("verifyStatusMvc");
+const minionZoneMvc = document.getElementById("minionZoneMvc");
+const graveyardMvc = document.getElementById("graveyardMvc");
+const btnS7InvokeMvc = document.getElementById("btnS7InvokeMvc");
+const btnS7BanishMvc = document.getElementById("btnS7BanishMvc");
 
 const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
                      <input type="text" id="inputNombreMvc" name="nombre" class="input" placeholder="Ej. Carlos Mendoza">`;
@@ -56,32 +47,33 @@ const HTML_STEP_2 = `<label class="form-label">Número Telefónico Corporativo:<
                      <input type="text" id="inputTelMvc" name="telefono" class="input" placeholder="Ej. 600112233">`;
 
 // MODELO: Estado en memoria
-const appState = {
-    s1: { progreso: 0, nivel: 1 },
-    s2: { saldoEuros: 0.0, divisa: "EUR" },
-    s3: { pasoActual: 1, formulario: { nombre: "", telefono: "" } },
-    s4: { damage: 0, lastHitTime: 0, isCombo: false },
-    s5: { hitCount: 0, totalDamage: 0, hits: [] },
-    s6: { color: "#6bcf7f", colorHistory: [] },
-    s7: { items: [] },
-    tasas: { EUR: 1.0, USD: 1.10, JPY: 160.0 }
-};
+let appState = getInitialState();
 
-function resetearEstructura() {
-    appState.s1 = { progreso: 0, nivel: 1 };
-    appState.s2 = { saldoEuros: 0.0, divisa: "EUR" };
-    appState.s3 = { pasoActual: 1, formulario: { nombre: "", telefono: "" } };
-    appState.s4 = { damage: 0, lastHitTime: 0, isCombo: false };
-    appState.s5 = { hitCount: 0, totalDamage: 0, hits: [] };
-    appState.s6 = { color: "#6bcf7f", colorHistory: [] };
-    appState.s7 = { items: [] };
-    selectS2Mvc.value = "EUR";
-    wrapperMvc.style.width = "100px";
-    previewMvc.innerText = "null";
-    colorPickerMvc.value = "#6bcf7f";
-    inputListMvc.value = "";
-    renderizar();
+function getInitialState() {
+    return {
+        s1: { progreso: 0, nivel: 1 },
+        s2: { saldoEuros: 0.0, divisa: "EUR" },
+        s3: { pasoActual: 1, formulario: { nombre: "", telefono: "" } },
+        s4: { damage: 0, lastHitTime: 0, isCombo: false },
+        s5: { level: 1 },
+        s6: { loot: [{ name: "Espada Larga", weight: 5, enchanted: false }, { name: "Escudo de Madera", weight: 3, enchanted: false }] },
+        s7: { minions: [] },
+        tasas: { EUR: 1.0, USD: 1.10, JPY: 160.0 }
+    };
 }
+
+// Resets
+document.getElementById("resetS1").addEventListener("click", () => { appState.s1 = getInitialState().s1; renderizar(); });
+document.getElementById("resetS2").addEventListener("click", () => { appState.s2 = getInitialState().s2; selectS2Mvc.value = "EUR"; renderizar(); });
+document.getElementById("resetS3").addEventListener("click", () => { appState.s3 = getInitialState().s3; previewMvc.innerText="null"; renderizar(); });
+document.getElementById("resetS4").addEventListener("click", () => { appState.s4 = getInitialState().s4; renderizar(); });
+document.getElementById("resetS5").addEventListener("click", () => { appState.s5 = getInitialState().s5; renderizar(); });
+document.getElementById("resetS6").addEventListener("click", () => { appState.s6 = getInitialState().s6; renderizar(); });
+document.getElementById("resetS7").addEventListener("click", () => { 
+    appState.s7 = getInitialState().s7; 
+    graveyardMvc.innerHTML = ""; 
+    renderizar(); 
+});
 
 // VISTA: Actualización del DOM a partir del Modelo
 function renderizar() {
@@ -121,48 +113,21 @@ function renderizar() {
         dummySpriteMvc.style.color = "var(--text-dark)";
     }
 
-    // Escenario 6: Gradiente de color
-    const gradient = `linear-gradient(135deg, ${appState.s6.color}, #4ec9b0)`;
-    gradientBoxMvc.style.background = gradient;
-    colorHistoryMvc.innerText = appState.s6.colorHistory.length === 0 ? "—" : appState.s6.colorHistory.join(", ");
-    colorCountMvc.innerText = appState.s6.colorHistory.length;
+    // Escenario 5: Niveles
+    heroLevelMvc.innerText = "Nivel: " + appState.s5.level;
 
-    // Escenario 5: Hits rápidos
-    hitCountMvc.innerText = appState.s5.hitCount;
-    totalHitsMvc.innerText = appState.s5.totalDamage;
-    hitLogMvc.innerText = appState.s5.hits.length === 0 ? "—" : appState.s5.hits.join(" + ");
+    // Escenario 6: Inventario
+    lootMvc.innerHTML = appState.s6.loot.map(item => {
+        const prefix = item.enchanted ? "✨ " : "";
+        return `<li>${prefix}${item.weight} kg - ${item.name}</li>`;
+    }).join("");
+    
+    let totalWeight = appState.s6.loot.reduce((acc, item) => acc + item.weight, 0);
+    weightMvc.innerText = totalWeight;
 
-    // Escenario 7: Lista editable
-    renderizarListaMvc();
-}
-
-function renderizarListaMvc() {
-    listContainerMvc.innerHTML = appState.s7.items
-        .map((item, index) => `<li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;"><span>${item.text}</span><button data-index="${index}" class="btn-delete-item" style="background: none; border: none; color: var(--flat-green); cursor: pointer; font-weight: bold; padding: 0 4px;">×</button></li>`)
-        .join("");
-    countMvc.innerText = appState.s7.items.length;
-    verifyCountMvc.innerText = appState.s7.items.length;
-    verifyStatusMvc.innerText = " — sincronizado";
-    verifyStatusMvc.style.color = "var(--text-muted)";
-
-    // Añadir listeners a los botones de eliminar
-    listContainerMvc.querySelectorAll(".btn-delete-item").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-            const index = parseInt(e.target.getAttribute("data-index"));
-            
-            // Borrado del Modelo es inmediato y seguro
-            appState.s7.items.splice(index, 1);
-            
-            const li = e.target.parentElement;
-            li.style.opacity = "0.4"; // Simula animación
-            
-            // Renderizado asíncrono no causa desincronización
-            setTimeout(() => {
-                renderizarListaMvc();
-                telemetryLog.innerText = `[MVC] Elemento eliminado de la lista. Total en Modelo: ${appState.s7.items.length}`;
-            }, 400);
-        });
-    });
+    // Escenario 7: Esbirros
+    countMvc.innerText = appState.s7.minions.length;
+    minionZoneMvc.innerHTML = appState.s7.minions.map(() => `<div class="minion-item" style="font-size: 2rem;">💀</div>`).join("");
 }
 
 // CONTROLADOR: Gestores de eventos
@@ -190,7 +155,6 @@ btnS2Mvc.addEventListener("click", () => {
     renderizar();
 });
 
-// Sincronización del formulario con el Modelo
 formContainerMvc.addEventListener("input", (e) => {
     const campo = e.target.name; 
     appState.s3.formulario[campo] = e.target.value;
@@ -213,7 +177,6 @@ btnS3Mvc.addEventListener("click", () => {
     telemetryLog.innerText = "[MVC] Formulario exportado desde el Modelo.";
 });
 
-// Controladores del Escenario 4 (MVC)
 btnS4Mvc.addEventListener("click", () => {
     const currentTime = Date.now();
     const comboActive = (currentTime - appState.s4.lastHitTime) < 1000;
@@ -222,7 +185,6 @@ btnS4Mvc.addEventListener("click", () => {
     let baseDamage = 20;
     let hitDamage = comboActive ? (baseDamage * 2) : baseDamage;
 
-    // Mutamos la variable numérica en memoria de forma segura
     appState.s4.damage += hitDamage;
     appState.s4.isCombo = comboActive;
 
@@ -234,77 +196,53 @@ btnS4Mvc.addEventListener("click", () => {
 });
 
 btnS4ClearMvc.addEventListener("click", () => {
-    appState.s4.damage = 0;
-    appState.s4.lastHitTime = 0;
-    appState.s4.isCombo = false;
-    telemetryLog.innerText = "[MVC] Muñeco de pruebas restablecido en el Modelo. Daño en memoria puesto a 0.";
-    renderizar();
+    document.getElementById("resetS4").click();
 });
 
-// Controladores del Escenario 5 (Hits rápidos)
-sliderS5Mvc.addEventListener("input", (e) => {
-    const mult = parseInt(e.target.value);
-    labelS5Mvc.innerText = `x${mult}`;
-});
-
+// Escenario 5
 btnS5Mvc.addEventListener("click", () => {
-    const mult = parseInt(sliderS5Mvc.value);
-    const damage = 10 * mult;
-    
-    appState.s5.hitCount++;
-    appState.s5.totalDamage += damage;
-    appState.s5.hits.push(damage);
-    
-    telemetryLog.innerText = `[MVC] Golpe registrado (+${damage}). Total: ${appState.s5.totalDamage}. Golpes: ${appState.s5.hitCount}`;
-    
-    // El renderizado asíncrono no corrompe los datos porque el Modelo ya se actualizó
-    setTimeout(() => {
-        renderizar();
-    }, 300);
-});
-
-btnS5ClearMvc.addEventListener("click", () => {
-    appState.s5.hitCount = 0;
-    appState.s5.totalDamage = 0;
-    appState.s5.hits = [];
-    telemetryLog.innerText = "[MVC] Contador de golpes restablecido en el Modelo.";
+    appState.s5.level += 1;
+    telemetryLog.innerText = `[MVC] Suma matemática (Number): 1 + 1 = 2. Nivel en memoria: ${appState.s5.level}`;
     renderizar();
 });
 
-// Controladores del Escenario 6 (Selector de colores)
-colorPickerMvc.addEventListener("change", (e) => {
-    appState.s6.color = e.target.value;
-    appState.s6.colorHistory.push(e.target.value);
-    telemetryLog.innerText = `[MVC] Color sincronizado en el Modelo: ${appState.s6.color}. Historial: ${appState.s6.colorHistory.length} cambios`;
+// Escenario 6
+btnS6AddMvc.addEventListener("click", () => {
+    appState.s6.loot.push({ name: "Manzana", weight: 1, enchanted: false });
+    telemetryLog.innerText = `[MVC] Objeto añadido al array del Modelo. Peso recalculado en base a datos reales.`;
     renderizar();
 });
 
-btnS6ResetMvc.addEventListener("click", () => {
-    appState.s6.color = "#6bcf7f";
-    appState.s6.colorHistory = [];
-    colorPickerMvc.value = "#6bcf7f";
-    telemetryLog.innerText = "[MVC] Historial y color restablecidos en el Modelo.";
+btnS6EnchantMvc.addEventListener("click", () => {
+    appState.s6.loot.forEach(item => item.enchanted = true);
+    telemetryLog.innerText = `[MVC] Encantamiento visual activado en el Modelo. No afecta al cálculo matemático de peso.`;
     renderizar();
 });
 
-// Controladores del Escenario 7 (Lista editable)
-btnAddListMvc.addEventListener("click", () => {
-    const texto = inputListMvc.value.trim();
-    if (!texto) {
-        telemetryLog.innerText = "[MVC] Campo vacío. No se añadió elemento.";
+// Escenario 7
+btnS7InvokeMvc.addEventListener("click", () => {
+    if (appState.s7.minions.length >= 3) {
+        telemetryLog.innerText = "[MVC] BLOQUEADO: Límite de 3 esbirros alcanzado en el Modelo.";
         return;
     }
-    appState.s7.items.push({ id: Date.now(), text: texto });
-    inputListMvc.value = "";
-    telemetryLog.innerText = `[MVC] Elemento añadido a la lista en el Modelo. Total: ${appState.s7.items.length}`;
+    appState.s7.minions.push(Date.now());
+    telemetryLog.innerText = `[MVC] Esbirro añadido al array puro. Total: ${appState.s7.minions.length}`;
     renderizar();
 });
 
-btnS7ClearMvc.addEventListener("click", () => {
-    appState.s7.items = [];
-    telemetryLog.innerText = "[MVC] Lista vaciada en el Modelo.";
+btnS7BanishMvc.addEventListener("click", () => {
+    // Traslada los esbirros actuales visualmente al cementerio para que se desvanezcan
+    const ghosts = Array.from(minionZoneMvc.children);
+    ghosts.forEach(g => {
+        g.classList.add("minion-fade");
+        graveyardMvc.appendChild(g);
+        setTimeout(() => g.remove(), 2000);
+    });
+    
+    // El modelo queda vacío y disponible de inmediato
+    appState.s7.minions = [];
+    telemetryLog.innerText = "[MVC] Array de esbirros vaciado al instante. ¡Puedes seguir invocando mientras los muertos se desvanecen!";
     renderizar();
 });
 
-btnResetAll.addEventListener("click", resetearEstructura);
-resetearEstructura();
+renderizar();
