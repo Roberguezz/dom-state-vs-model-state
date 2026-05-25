@@ -345,6 +345,58 @@ body {
     text-align: center;
 }
 
+/* --- TIMER STACKING (ESCENARIO 05) --- */
+.timer-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.timer-sandbox {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    align-items: center;
+    justify-content: center;
+    min-height: 90px;
+}
+
+.tick-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+}
+
+.tick-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.tick-counter {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1;
+    min-width: 60px;
+}
+
+.tick-indicator {
+    width: 100%;
+    height: 12px;
+    border-radius: 3px;
+    background-color: var(--border-color);
+    transition: background-color 0.05s;
+}
+
+.tick-indicator.tick-active.tick-indicator-red {
+    background-color: var(--flat-red);
+}
+
+.tick-indicator.tick-active.tick-indicator-green {
+    background-color: var(--flat-green);
+}
+
 /* --- MÉTRICAS Y BARRAS --- */
 .metric {
     font-size: 0.95rem;
@@ -613,7 +665,8 @@ details[open] .icon-toggle {
     color: var(--flat-green);
 }
 
-/* --- INTEGRACIÓN PRISM CON COLOREADO NATURAL (ESTILO VS CODE / ANIME.JS) --- */
+/* --- INTEGRACIÓN PRISM --- */
+/* Color base para texto sin tokenizar (variables, identificadores, etc.) */
 .code-grid pre, .code-grid code {
     font-family: var(--font-mono) !important;
     font-size: 0.8rem !important;
@@ -623,17 +676,30 @@ details[open] .icon-toggle {
     line-height: 1.5;
     background: none !important;
     padding: 0 !important;
+    color: #d4d4d4 !important; /* Color base: toda la plantilla sale visible */
 }
 
-/* Coloreado nativo de los tokens de Prism */
-.code-grid .token.keyword { color: #c586c0 !important; font-weight: 700; }
-.code-grid .token.comment { color: #6a9955 !important; font-style: italic; }
-.code-grid .token.string { color: #ce9178 !important; }
-.code-grid .token.number, .code-grid .token.boolean { color: #b5cea8 !important; }
-.code-grid .token.function { color: #dcdcaa !important; }
-.code-grid .token.operator, .code-grid .token.punctuation { color: #d4d4d4 !important; }
-.code-grid .token.property { color: #9cdcfe !important; }
+/* Tokens de Prism — paleta VS Code Dark */
+.code-grid .token.keyword    { color: #c586c0 !important; font-weight: 600; }
+.code-grid .token.comment    { color: #6a9955 !important; font-style: italic; }
+.code-grid .token.string     { color: #ce9178 !important; }
+.code-grid .token.template-string { color: #ce9178 !important; }
+.code-grid .token.template-punctuation { color: #ce9178 !important; }
+.code-grid .token.interpolation { color: #d4d4d4 !important; }
+.code-grid .token.number     { color: #b5cea8 !important; }
+.code-grid .token.boolean    { color: #569cd6 !important; }
+.code-grid .token.constant   { color: #9cdcfe !important; }
+.code-grid .token.function   { color: #dcdcaa !important; }
+.code-grid .token.method     { color: #dcdcaa !important; }
+.code-grid .token.property   { color: #9cdcfe !important; }
+.code-grid .token.operator   { color: #d4d4d4 !important; }
+.code-grid .token.punctuation { color: #d4d4d4 !important; }
 .code-grid .token.class-name { color: #4ec9b0 !important; }
+.code-grid .token.parameter  { color: #9cdcfe !important; }
+.code-grid .token.variable   { color: #9cdcfe !important; }
+.code-grid .token.attr-name  { color: #9cdcfe !important; }
+.code-grid .token.builtin    { color: #4ec9b0 !important; }
+.code-grid .token.regex      { color: #d16969 !important; }
 
 /* --- BARRA DE LOGS / CONSOLA SIMPLE --- */
 .telemetry-bar {

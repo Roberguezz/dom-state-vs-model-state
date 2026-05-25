@@ -304,7 +304,7 @@ function renderPaso1() {
             <div class="section-badge">04 // COMBATE RPG Y MULTIPLICADOR DE COMBO</div>
             <h2>Combate RPG y Multiplicador de Combo</h2>
             <p class="description">
-                <strong>Un consejo de colega:</strong> Imagina que estás programando un minijuego RPG de combate y añades una mecánica de combos rápidos que escribe en el marcador de daño el texto: <code>"¡COMBO! 120"</code>. En la versión acoplada al DOM, para registrar el daño del siguiente golpe, el código debe leer el texto visible en la pantalla e intentar parsearlo. Sin embargo, al procesar la cadena con letras (<code>"¡COMBO! 120"</code>), el parser falla y devuelve un error <strong>NaN</strong>, destruyendo el combate de inmediato. Con un Modelo en memoria, la matemática de daño se procesa aislada en variables de JS puros, volviendo el sistema inmune a cómo se dibuje la pantalla. Haz clics rápidos en ambos paneles y verás la diferencia.
+                Al encadenar golpes rápidos, el sistema activa un multiplicador de combo que escribe en el marcador el texto <code>"¡COMBO! 120"</code>. En la versión acoplada al DOM, el código recupera el total acumulado leyendo ese texto de la pantalla e intenta parsearlo numéricamente. Al procesar una cadena con letras, <code>parseFloat</code> devuelve <code>NaN</code>, corrompiendo el marcador de forma irrecuperable. Con el Modelo en memoria, el acumulado numérico permanece intacto independientemente de cómo lo muestre la vista.
             </p>
             
             <div class="grid">
@@ -388,9 +388,117 @@ if (appState.s4.isCombo) {
                 </div>
             </details>
         </section>
+
+        <!-- ESCENARIO 05 -->
+        <section class="section" id="escenario5">
+            <div class="section-badge">05 // ACUMULACIÓN DE TEMPORIZADORES ASÍNCRONOS</div>
+            <h2>Timer Stacking: Temporizadores Apilados</h2>
+            <p class="description">
+                Al iniciar bucles asíncronos con <code>setInterval</code>, es imprescindible guardar la referencia del identificador de temporizador para poder cancelarlo antes de crear uno nuevo. En la versión acoplada al DOM no existe un Modelo que almacene dicha referencia, por lo que cada pulsación del botón o cada cambio en el deslizador de velocidad apila un nuevo bucle sobre los anteriores. El resultado es inmediatamente visible: el contador se dispara de forma exponencial. En la versión MVC, el identificador se guarda en el Modelo, lo que permite limpiar el bucle previo antes de arrancar uno nuevo, manteniendo siempre exactamente un temporizador activo.
+            </p>
+
+            <div class="grid">
+                <div class="panel panel-no-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="timer-controls">
+                            <label class="form-label">Velocidad del ciclo:</label>
+                            <div class="control-row">
+                                <input type="range" id="sliderS5Coupled" min="100" max="1500" value="800" step="100" class="custom-slider">
+                                <span id="labelS5Coupled" class="badge">800ms</span>
+                            </div>
+                        </div>
+                        <div class="sandbox">
+                            <div class="timer-sandbox">
+                                <div class="tick-row">
+                                    <span class="tick-label">Ticks:</span>
+                                    <span id="tickCountCoupled" class="tick-counter text-red">0</span>
+                                </div>
+                                <div id="tickIndicatorCoupled" class="tick-indicator tick-indicator-red"></div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button id="btnS5StartCoupled" class="btn btn-primary">Iniciar</button>
+                            <button id="btnS5StopCoupled" class="btn btn-secondary">Detener</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel panel-mvc">
+                    <div class="panel-header">
+                        <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
+                    </div>
+                    <div class="sandbox-content">
+                        <div class="timer-controls">
+                            <label class="form-label">Velocidad del ciclo:</label>
+                            <div class="control-row">
+                                <input type="range" id="sliderS5Mvc" min="100" max="1500" value="800" step="100" class="custom-slider">
+                                <span id="labelS5Mvc" class="badge">800ms</span>
+                            </div>
+                        </div>
+                        <div class="sandbox">
+                            <div class="timer-sandbox">
+                                <div class="tick-row">
+                                    <span class="tick-label">Ticks:</span>
+                                    <span id="tickCountMvc" class="tick-counter text-green">0</span>
+                                </div>
+                                <div id="tickIndicatorMvc" class="tick-indicator tick-indicator-green"></div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button id="btnS5StartMvc" class="btn btn-primary">Iniciar</button>
+                            <button id="btnS5StopMvc" class="btn btn-secondary">Detener</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <details class="code-details">
+                <summary class="flex-center">
+                    <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="m6 9 6 6 6-6"/>
+                    </svg>
+                    Código fuente de comparación
+                </summary>
+                <div class="code-grid">
+                    <div>
+                        <div class="code-label">no-mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">// No existe referencia al timer anterior; cada llamada apila uno nuevo
+btnS5StartCoupled.addEventListener("click", () => {
+    const ms = parseInt(sliderS5Coupled.value);
+
+    // Sin clearInterval previo: los timers se acumulan indefinidamente
+    setInterval(() => {
+        let n = parseInt(tickCountCoupled.innerText) || 0;
+        tickCountCoupled.innerText = n + 1;
+        tickIndicatorCoupled.classList.toggle("tick-active");
+    }, ms);
+});</code></pre>
+                    </div>
+                    <div>
+                        <div class="code-label">mvc.js</div>
+                        <pre class="language-javascript"><code class="language-javascript">btnS5StartMvc.addEventListener("click", () => {
+    // Limpia el timer anterior antes de crear uno nuevo
+    clearInterval(appState.s5.timerId);
+
+    appState.s5.interval = parseInt(sliderS5Mvc.value);
+    appState.s5.timerId = setInterval(() => {
+        appState.s5.ticks++;
+        renderizar(); // La vista refleja el Modelo
+    }, appState.s5.interval);
+});</code></pre>
+                    </div>
+                </div>
+                <div class="analysis-block">
+                    <p><strong>Explicación:</strong> En la versión acoplada, la referencia al identificador de temporizador no se almacena en ningún lugar externo al DOM, por lo que es imposible cancelar el bucle previo antes de crear uno nuevo. Cada pulsación de "Iniciar" añade un bucle paralelo. En la versión MVC, el identificador se guarda en <code>appState.s5.timerId</code> y se cancela explícitamente antes de arrancar el nuevo ciclo, garantizando que solo exista un temporizador activo en cualquier momento.</p>
+                </div>
+            </details>
+        </section>
     </div>
 
-    <!-- Barra de Eventos de Interacción Simple (Consola) -->
+    <!-- Consola -->
     <div class="telemetry-bar">
         <div class="telemetry-brand">
             <span class="pulse-indicator"></span>
