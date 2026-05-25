@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desacoplamiento Frontend: DOM vs MVC</title>
-    <!-- Tipografía de Google Fonts Premium -->
+    <title>Separación de Vista y Modelo en Frontend</title>
+    <!-- Tipografía Premium Limpia -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -14,31 +14,31 @@
 <body>
 
     <div class="container">
-        <!-- Encabezado Estilizado con Marca -->
+        <!-- Encabezado de la Guía -->
         <header class="app-header">
-            <div class="badge-tech">LABORATORIO ARQUITECTÓNICO</div>
-            <h1>Separación de Estado</h1>
-            <p class="lead">Un laboratorio visual diseñado para entender de forma empírica la diferencia de almacenar la lógica en el árbol de nodos HTML (DOM) frente a un flujo unificado y centralizado en memoria (MVC).</p>
+            <div class="badge-tech">Patrones de Arquitectura</div>
+            <h1>Separación de Vista y Modelo</h1>
+            <p class="lead">Ejemplos prácticos e interactivos que demuestran por qué mantener el estado de la aplicación en el DOM dificulta el mantenimiento, y cómo delegar la lógica de negocio a un Modelo en memoria soluciona este problema de diseño.</p>
             <div class="global-actions">
                 <button id="btnResetAll" class="btn btn-secondary flex-center">
                     <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
                     </svg>
-                    Restablecer Suite por Completo
+                    Restablecer estado
                 </button>
             </div>
         </header>
 
         <!-- ESCENARIO 01 -->
         <section class="section" id="escenario1">
-            <div class="section-badge">01 // ESCALABILIDAD RESPONSIVA</div>
-            <h2>Escala del Componente de Interfaz (HUD)</h2>
+            <div class="section-badge">01 // DIMENSIONAMIENTO DEL CONTENEDOR</div>
+            <h2>Escala Física del Contenedor</h2>
             <p class="description">
-                <strong>Un consejo de colega:</strong> Imagina que estás maquetando un componente responsivo o un HUD de juego que escala según la pantalla. Si tu lógica calcula el progreso leyendo directamente los píxeles físicos del elemento en el DOM, tu aplicación se romperá al cambiar el tamaño de la interfaz. Al acoplar el cálculo matemático a los píxeles de pantalla, dependes del renderizado físico del navegador. Con MVC, mantenemos el estado puro en memoria con porcentajes y dejamos que la vista se adapte libremente.
+                Cuando se cambia el tamaño de un componente de interfaz en el DOM, es un error de diseño calcular su progreso leyendo el ancho físico del contenedor en píxeles. Si el contenedor se redimensiona, la lógica matemática ligada a las dimensiones físicas de pantalla se rompe. Con una vista desacoplada, mantenemos el progreso en un porcentaje matemático puro en memoria (Modelo) y dejamos que el DOM se limite a pintarlo de forma responsiva.
             </p>
             
             <div class="inline-control-card">
-                <label for="sliderScale">Ajustar ancho físico del HUD (100px - 300px):</label>
+                <label for="sliderScale">Simular ancho del contenedor físico (100px - 300px):</label>
                 <div class="control-row">
                     <input type="range" id="sliderScale" min="100" max="300" value="100" class="custom-slider">
                     <span id="labelScale" class="badge">100px</span>
@@ -48,12 +48,12 @@
             <div class="grid">
                 <div class="panel panel-no-mvc">
                     <div class="panel-header">
-                        <span class="dot dot-red"></span> Código Acoplado (DOM)
+                        <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
                         <button id="btnS1Coupled" class="btn btn-primary">Cargar Datos (+20 Puntos)</button>
                         <div class="sandbox">
-                            <div class="metric">Nivel HUD: <span id="lvlCoupled" class="counter">1</span></div>
+                            <div class="metric">Nivel actual: <span id="lvlCoupled" class="counter">1</span></div>
                             <div class="progress-container" id="wrapperCoupled">
                                 <div id="barCoupled" class="progress-bar bar-red" style="width: 0px;"></div>
                             </div>
@@ -63,12 +63,12 @@
                 
                 <div class="panel panel-mvc">
                     <div class="panel-header">
-                        <span class="dot dot-green"></span> Código Desacoplado (MVC)
+                        <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
                         <button id="btnS1Mvc" class="btn btn-primary">Cargar Datos (+20 Puntos)</button>
                         <div class="sandbox">
-                            <div class="metric">Nivel HUD: <span id="lvlMvc" class="counter">1</span></div>
+                            <div class="metric">Nivel actual: <span id="lvlMvc" class="counter">1</span></div>
                             <div class="progress-container" id="wrapperMvc">
                                 <div id="barMvc" class="progress-bar bar-green" style="width: 0%;"></div>
                             </div>
@@ -82,7 +82,7 @@
                     <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m6 9 6 6 6-6"/>
                     </svg>
-                    Análisis Técnico y Código de Muestra
+                    Código fuente de comparación
                 </summary>
                 <div class="code-grid">
                     <div>
@@ -91,7 +91,7 @@
 let px = parseInt(barCoupled.style.width) || 0;
 let nuevo = px + 20;
 
-// Si el HUD cambia a 300px, el límite estricto de 100px rompe el flujo
+// Si el contenedor se redimensiona a 300px, el límite estricto de 100px falla
 if (nuevo >= 100) {
     lvlCoupled.innerText = parseInt(lvlCoupled.innerText) + 1;
     nuevo = 0;
@@ -100,7 +100,7 @@ barCoupled.style.width = nuevo + "px";</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Modifica el dato puro en memoria (en porcentaje)
+                        <pre class="language-javascript"><code class="language-javascript">// Modifica el dato puro en memoria en porcentaje (Modelo)
 appState.s1.progreso += 20;
 
 if (appState.s1.progreso >= 100) {
@@ -108,12 +108,12 @@ if (appState.s1.progreso >= 100) {
     appState.s1.progreso = 0;
 }
 
-// La vista renderiza el porcentaje adaptativo de forma reactiva
+// La vista se limita a renderizar el porcentaje de forma reactiva
 barMvc.style.width = appState.s1.progreso + "%";</code></pre>
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>¿Por qué falla el acoplamiento?</strong> Al cambiar el tamaño del HUD a 300px, el código acoplado sigue limitando de forma rígida la barra a 100px, debido a que su lógica matemática quedó ligada a las dimensiones físicas de la pantalla. Separando el estado (MVC), el cálculo es inmune a las dimensiones visuales del contenedor.</p>
+                    <p><strong>Explicación:</strong> Al redimensionar el contenedor a 300px, el código acoplado mantiene el límite rígido a 100px debido a que su lógica matemática depende de los píxeles físicos de renderizado de la pantalla. Al separar el estado en un Modelo en memoria, el cálculo matemático se independiza de las dimensiones visuales del elemento.</p>
                 </div>
             </details>
         </section>
@@ -123,17 +123,17 @@ barMvc.style.width = appState.s1.progreso + "%";</code></pre>
             <div class="section-badge">02 // INTEGRIDAD DE DATOS</div>
             <h2>Conversión Dinámica de Divisas</h2>
             <p class="description">
-                <strong>Un consejo de colega:</strong> Es muy tentador hacer "data scraping" leyendo el texto de las etiquetas HTML para ahorrarte una variable en JS. Pero mira lo que ocurre al internacionalizar tu app: en cuanto aparece un símbolo de otra divisa como el signo de dólar ($) o yenes (¥), tus funciones de limpieza de texto fallan estrepitosamente, inyectando un valor corrupto (NaN) de forma irreversible en tus cuentas. Si mantienes el valor numérico limpio en el modelo, la vista solo se limita a presentarlo formateado. ¡Tus cuentas saldrán perfectas!
+                Intentar recuperar valores leyendo el texto visible en las etiquetas del DOM es una práctica frágil. Al dar formato a las monedas o cambiar a divisas como dólares ($) o yenes (¥), las funciones de parseo y limpieza de texto fallan, inyectando un valor de número inválido (NaN). Mantener el estado financiero puro en el Modelo garantiza que las sumas y las conversiones siempre operen sobre números correctos.
             </p>
             
             <div class="grid">
                 <div class="panel panel-no-mvc">
                     <div class="panel-header">
-                        <span class="dot dot-red"></span> Código Acoplado (DOM)
+                        <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
                         <div class="control-group">
-                            <label class="form-label">Divisa seleccionada:</label>
+                            <label class="form-label">Divisa de visualización:</label>
                             <select id="selectS2Coupled" class="select">
                                 <option value="EUR">Euros (€) - Base</option>
                                 <option value="USD">Dólares ($) - Tasa 1.10</option>
@@ -149,11 +149,11 @@ barMvc.style.width = appState.s1.progreso + "%";</code></pre>
                 
                 <div class="panel panel-mvc">
                     <div class="panel-header">
-                        <span class="dot dot-green"></span> Código Desacoplado (MVC)
+                        <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
                         <div class="control-group">
-                            <label class="form-label">Divisa seleccionada:</label>
+                            <label class="form-label">Divisa de visualización:</label>
                             <select id="selectS2Mvc" class="select">
                                 <option value="EUR">Euros (€) - Base</option>
                                 <option value="USD">Dólares ($) - Tasa 1.10</option>
@@ -173,16 +173,16 @@ barMvc.style.width = appState.s1.progreso + "%";</code></pre>
                     <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m6 9 6 6 6-6"/>
                     </svg>
-                    Análisis Técnico y Código de Muestra
+                    Código fuente de comparación
                 </summary>
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Lee el texto visible directo de la pantalla
+                        <pre class="language-javascript"><code class="language-javascript">// Lee el texto visible directamente de la pantalla
 let texto = totalCoupled.innerText;
 
-// BUG: Al cambiar a USD el texto pasa a "$ 11.00".
-// El replace(" €") no quita el "$" y el parser inyecta un NaN destructivo
+// BUG: Al cambiar a USD ("$ 11.00"), la limpieza de "€" no surte efecto.
+// parseFloat falla en su análisis devolviendo NaN, corrompiendo la suma.
 let limpio = parseFloat(texto.replace(" €", ""));
 let total = limpio + 10.00;
 
@@ -190,10 +190,10 @@ totalCoupled.innerText = total + " €";</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// El incremento financiero ocurre sobre memoria RAM pura
+                        <pre class="language-javascript"><code class="language-javascript">// El incremento se realiza sobre un número puro en memoria
 appState.s2.saldoEuros += 10.00;
 
-// La vista se limita a multiplicar por la tasa y dar formato
+// La vista solo se encarga de formatear el valor a partir de los datos
 let tasa = appState.tasas[divisaActiva];
 let totalCalculado = appState.s2.saldoEuros * tasa;
 
@@ -201,23 +201,23 @@ totalMvc.innerText = formatear(totalCalculado, divisaActiva);</code></pre>
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>¿Por qué ocurre este error?</strong> Se ha usado la interfaz como si fuese una base de datos (técnica frágil llamada <em>Data Scraping</em>). Al alterar el orden o los símbolos de los caracteres monetarios internacionales, las expresiones regulares básicas fallan y devuelven un estado corrupto <code>NaN</code>.</p>
+                    <p><strong>Explicación:</strong> Al extraer el estado directamente de la interfaz, cualquier variación en el orden o en el tipo de caracteres de los símbolos internacionales provoca fallos en las expresiones regulares básicas, resultando en estados corruptos persistentes.</p>
                 </div>
             </details>
         </section>
 
         <!-- ESCENARIO 03 -->
         <section class="section" id="escenario3">
-            <div class="section-badge">03 // CICLO DE VIDA DEL DOM</div>
-            <h2>Persistencia de Formulario y Ciclo de Vida</h2>
+            <div class="section-badge">03 // CICLO DE VIDA DE NODOS</div>
+            <h2>Persistencia e inputs Dinámicos</h2>
             <p class="description">
-                <strong>Un consejo de colega:</strong> En aplicaciones interactivas modernas por pasos, solemos destruir y renderizar partes del DOM para mantener la interfaz ligera y optimizada. Si confías en que los inputs del HTML almacenen la información del usuario, al eliminar la sección para avanzar de pantalla, esos datos se evaporarán. Centralizar los inputs en un modelo en memoria garantiza que, aunque destruyas y recrees la interfaz mil veces, la información de tu usuario estará sana y salva. Escribe tu nombre en el paso 1, avanza al paso 2 y luego regresa: verás que la versión acoplada te ha borrado el nombre para siempre.
+                Al alternar o recrear secciones HTML dinámicamente en aplicaciones frontend, confiar el estado a los inputs del DOM provoca la pérdida irreversible de los datos en cuanto el nodo se desmonta o destruye del árbol del navegador. Centralizar las entradas en un Modelo en memoria asegura que la información permanezca persistente e independiente del ciclo de vida o renderizado de la interfaz. Escribe un nombre en el paso 1, avanza al paso 2 y regresa: el input acoplado se habrá borrado.
             </p>
             
             <div class="grid">
                 <div class="panel panel-no-mvc">
                     <div class="panel-header">
-                        <span class="dot dot-red"></span> Código Acoplado (DOM)
+                        <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
                         <div class="form-box" id="formContainerCoupled" style="min-height: 90px;"></div>
@@ -233,14 +233,14 @@ totalMvc.innerText = formatear(totalCalculado, divisaActiva);</code></pre>
                         </div>
                         <div class="sandbox-action">
                             <button id="btnS3Coupled" class="btn btn-primary">Exportar Registro</button>
-                            <div class="payload-box">Payload capturado: <span id="previewCoupled" class="code-inline">null</span></div>
+                            <div class="payload-box">Datos capturados: <span id="previewCoupled" class="code-inline">null</span></div>
                         </div>
                     </div>
                 </div>
                 
                 <div class="panel panel-mvc">
                     <div class="panel-header">
-                        <span class="dot dot-green"></span> Código Desacoplado (MVC)
+                        <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
                         <div class="form-box" id="formContainerMvc" style="min-height: 90px;"></div>
@@ -256,7 +256,7 @@ totalMvc.innerText = formatear(totalCalculado, divisaActiva);</code></pre>
                         </div>
                         <div class="sandbox-action">
                             <button id="btnS3Mvc" class="btn btn-primary">Exportar Registro</button>
-                            <div class="payload-box">Payload capturado: <span id="previewMvc" class="code-inline">null</span></div>
+                            <div class="payload-box">Datos capturados: <span id="previewMvc" class="code-inline">null</span></div>
                         </div>
                     </div>
                 </div>
@@ -267,26 +267,26 @@ totalMvc.innerText = formatear(totalCalculado, divisaActiva);</code></pre>
                     <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m6 9 6 6 6-6"/>
                     </svg>
-                    Análisis Técnico y Código de Muestra
+                    Código fuente de comparación
                 </summary>
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Reemplaza físicamente la vista con innerHTML
+                        <pre class="language-javascript"><code class="language-javascript">// Cambia la sección reescribiendo el contenido del contenedor
 function irAPaso2() {
-    // Al sobrescribir el nodo padre, el valor del input del Paso 1
-    // que el usuario escribió se destruye por completo del DOM
+    // Al sobrescribir el contenedor, los elementos HTML antiguos
+    // y los datos escritos en ellos se eliminan de la memoria.
     formContainerCoupled.innerHTML = HTML_STEP_2;
 }</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Escucha los cambios del input en tiempo real sobre el Modelo
+                        <pre class="language-javascript"><code class="language-javascript">// Sincroniza la entrada del input dinámicamente con el Modelo
 formContainerMvc.addEventListener("input", (e) => {
     appState.s3.formulario[e.target.name] = e.target.value;
 });
 
-// Al reconstruir los campos, se restauran desde memoria
+// Al reconstruir los inputs, los valores se inyectan desde el Modelo
 function renderPaso1() {
     formContainerMvc.innerHTML = HTML_STEP_1;
     document.getElementById("inputNombreMvc").value = appState.s3.formulario.nombre;
@@ -294,78 +294,78 @@ function renderPaso1() {
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>¿Por qué se pierde la información?</strong> Al usar <code>innerHTML</code> para cambiar de pantalla, el navegador destruye los nodos antiguos del DOM. Puesto que el valor escrito no existía en variables de JavaScript, el estado de los datos del usuario es destruido permanentemente al desaparecer su representación visual.</p>
+                    <p><strong>Explicación:</strong> Modificar contenedores mediante <code>innerHTML</code> destruye los objetos de nodo anteriores. Si los datos ingresados no se guardan en variables fuera del DOM, la información del usuario se pierde definitivamente al desmontar la interfaz visual.</p>
                 </div>
             </details>
         </section>
 
-        <!-- ESCENARIO 04 (NUEVO) -->
+        <!-- ESCENARIO 04 -->
         <section class="section" id="escenario4">
-            <div class="section-badge">04 // SINCRONIZACIÓN MULTIVISTA</div>
-            <h2>Sincronización Multivista en Tiempo Real</h2>
+            <div class="section-badge">04 // COMPLEJIDAD DE LA VISTA</div>
+            <h2>Sincronización Multivista</h2>
             <p class="description">
-                <strong>Un consejo de colega:</strong> Imagina que tienes un carrito de compras y necesitas actualizar tres vistas independientes al mismo tiempo: un contador del carrito en la cabecera, la lista detallada de servicios en el centro y el total acumulado en el pie de página. Con el código acoplado al DOM, cada click te obliga a buscar y mutar a mano cada uno de los elementos visuales por separado. Si mañana añades una cuarta vista, tu código se volverá increíblemente frágil. Con MVC, modifiques lo que modifiques, solo actualizas una colección en memoria y la función de renderizado se encarga de que todas las vistas permanezcan unificadas y sin fallas.
+                Cuando múltiples elementos independientes de la interfaz deben reflejar el mismo cambio (como un contador numérico de items, un listado detallado y el importe total de la compra), modificar cada nodo del DOM de forma manual e imperativa incrementa la complejidad del código. Centralizar los datos en el Modelo permite que una única función renderice y mantenga la coherencia de todas las vistas automáticamente al mutar el estado en memoria.
             </p>
             
             <div class="grid">
                 <div class="panel panel-no-mvc">
                     <div class="panel-header">
-                        <span class="dot dot-red"></span> Código Acoplado (DOM)
+                        <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
-                        <!-- Vista 1: Cabecera de carrito -->
+                        <!-- Vista 1 -->
                         <div class="cart-header-widget flex-between">
-                            <span class="widget-title">🛒 Resumen de Servicios</span>
+                            <span class="widget-title">Resumen de selección</span>
                             <span class="badge badge-red" id="cartBadgeCoupled">0</span>
                         </div>
                         
-                        <!-- Vista 2: Lista de ítems en el DOM -->
+                        <!-- Vista 2 -->
                         <div class="sandbox cart-sandbox">
                             <ul id="cartListCoupled" class="cart-list">
-                                <li class="cart-empty">Carrito vacío</li>
+                                <li class="cart-empty">Sin elementos</li>
                             </ul>
                         </div>
                         
-                        <!-- Vista 3: Total del carrito -->
+                        <!-- Vista 3 -->
                         <div class="cart-total-bar flex-between">
-                            <span class="total-label">Total a pagar:</span>
+                            <span class="total-label">Total acumulado:</span>
                             <span class="total-display text-red" id="cartTotalCoupled">$ 0.00</span>
                         </div>
 
                         <div class="form-actions space-top">
-                            <button id="btnS4AddCoupled" class="btn btn-primary">Añadir Servicio (+$49.99)</button>
-                            <button id="btnS4ClearCoupled" class="btn btn-secondary">Vaciar Carrito</button>
+                            <button id="btnS4AddCoupled" class="btn btn-primary">Añadir elemento (+$49.99)</button>
+                            <button id="btnS4ClearCoupled" class="btn btn-secondary">Vaciar selección</button>
                         </div>
                     </div>
                 </div>
                 
                 <div class="panel panel-mvc">
                     <div class="panel-header">
-                        <span class="dot dot-green"></span> Código Desacoplado (MVC)
+                        <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
-                        <!-- Vista 1: Cabecera de carrito -->
+                        <!-- Vista 1 -->
                         <div class="cart-header-widget flex-between">
-                            <span class="widget-title">🛒 Resumen de Servicios</span>
+                            <span class="widget-title">Resumen de selección</span>
                             <span class="badge badge-green" id="cartBadgeMvc">0</span>
                         </div>
                         
-                        <!-- Vista 2: Lista de ítems en el Modelo -->
+                        <!-- Vista 2 -->
                         <div class="sandbox cart-sandbox">
                             <ul id="cartListMvc" class="cart-list">
-                                <li class="cart-empty">Carrito vacío</li>
+                                <li class="cart-empty">Sin elementos</li>
                             </ul>
                         </div>
                         
-                        <!-- Vista 3: Total del carrito -->
+                        <!-- Vista 3 -->
                         <div class="cart-total-bar flex-between">
-                            <span class="total-label">Total a pagar:</span>
+                            <span class="total-label">Total acumulado:</span>
                             <span class="total-display text-green" id="cartTotalMvc">$ 0.00</span>
                         </div>
 
                         <div class="form-actions space-top">
-                            <button id="btnS4AddMvc" class="btn btn-primary">Añadir Servicio (+$49.99)</button>
-                            <button id="btnS4ClearMvc" class="btn btn-secondary">Vaciar Carrito</button>
+                            <button id="btnS4AddMvc" class="btn btn-primary">Añadir elemento (+$49.99)</button>
+                            <button id="btnS4ClearMvc" class="btn btn-secondary">Vaciar selección</button>
                         </div>
                     </div>
                 </div>
@@ -376,7 +376,7 @@ function renderPaso1() {
                     <svg class="icon-toggle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <path d="m6 9 6 6 6-6"/>
                     </svg>
-                    Análisis Técnico y Código de Muestra
+                    Código fuente de comparación
                 </summary>
                 <div class="code-grid">
                     <div>
@@ -394,10 +394,10 @@ cartTotalCoupled.innerText = `$ ${total.toFixed(2)}`;</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// 1. Mutación exclusiva de la estructura en memoria
+                        <pre class="language-javascript"><code class="language-javascript">// 1. Modificación exclusiva de la colección en el Modelo
 appState.s4.items.push(nuevoItem);
 
-// 2. Renderizado unificado y consistente
+// 2. Renderizado unificado de todos los elementos visuales
 function renderizar() {
     cartBadgeMvc.innerText = appState.s4.items.length;
     cartListMvc.innerHTML = appState.s4.items.map(renderItemHtml).join("");
@@ -406,19 +406,19 @@ function renderizar() {
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>¿Qué ventaja aporta el desacoplamiento?</strong> Con el código acoplado, actualizar 3 vistas independientes requiere escribir selectores imperativos redundantes para cada elemento en el DOM. En cambio, con MVC la interfaz se reduce a ser un reflejo directo del Modelo. Si agregamos una cuarta o quinta vista en el futuro, no es necesario tocar los controladores existentes, garantizando consistencia absoluta y escalabilidad.</p>
+                    <p><strong>Explicación:</strong> En el código acoplado, el controlador debe actualizar explícitamente cada nodo de la interfaz de manera secuencial e imperativa. En el modelo desacoplado, la vista es una proyección pura del Modelo. Añadir nuevas vistas adicionales no altera los controladores existentes.</p>
                 </div>
             </details>
         </section>
     </div>
 
-    <!-- Consola de Telemetría Flotante Ultra-Premium -->
+    <!-- Barra de Eventos de Interacción Simple -->
     <div class="telemetry-bar">
         <div class="telemetry-brand">
             <span class="pulse-indicator"></span>
-            <span class="telemetry-tag">TELEMETRÍA //</span>
+            <span class="telemetry-tag">LOG DE EVENTOS //</span>
         </div>
-        <span id="telemetryMsg" class="telemetry-message">Iniciando consola de seguimiento unificada del laboratorio...</span>
+        <span id="telemetryMsg" class="telemetry-message">Listo. Esperando interacciones en la página...</span>
     </div>
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
