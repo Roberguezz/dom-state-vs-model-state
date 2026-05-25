@@ -58,20 +58,18 @@ const HTML_STEP_2 = `<label class="form-label">Número Telefónico Corporativo:<
                      <input type="text" id="inputTelCoupled" class="input" placeholder="Ej. 600112233">`;
 
 let coupledStep = 1;
-let tempTelefono = ""; 
 let coupledLastHitTime = 0;
 
 function reiniciarTodo() {
     barCoupled.style.width = "0px";
     lvlCoupled.innerText = "1";
-    totalCoupled.innerText = "0.00 €";
+    totalCoupled.innerText = "Total: 0.00 €";
     selectS2Coupled.value = "EUR";
     sliderScale.value = "100";
     labelScale.innerText = "100px";
     wrapperCoupled.style.width = "100px";
     previewCoupled.innerText = "null";
     coupledStep = 1;
-    tempTelefono = "";
     coupledLastHitTime = 0;
     totalDmgCoupled.innerText = "0";
     dummySpriteCoupled.innerText = "(*'-'*)";
@@ -159,21 +157,19 @@ function irAPaso1() {
 btnNextCoupled.addEventListener("click", () => {
     coupledStep = 2;
     formContainerCoupled.innerHTML = HTML_STEP_2;
-    document.getElementById("inputTelCoupled").value = tempTelefono;
     btnPrevCoupled.disabled = false;
     btnNextCoupled.disabled = true;
     telemetryLog.innerText = "[DOM] Nodo contenedor sobreescrito con innerHTML. Los datos del input destruido se han perdido.";
 });
 
 btnPrevCoupled.addEventListener("click", () => {
-    tempTelefono = document.getElementById("inputTelCoupled").value;
     irAPaso1();
-    telemetryLog.innerText = "[DOM] Contenedor de paso 1 recreado. El valor del nombre se ha perdido al no estar guardado.";
+    telemetryLog.innerText = "[DOM] Contenedor de paso 1 recreado. El valor del teléfono se ha perdido irremediablemente.";
 });
 
 btnS3Coupled.addEventListener("click", () => {
     let nombreDetectado = document.getElementById("inputNombreCoupled") ? document.getElementById("inputNombreCoupled").value : "";
-    let telDetectado = document.getElementById("inputTelCoupled") ? document.getElementById("inputTelCoupled").value : tempTelefono;
+    let telDetectado = document.getElementById("inputTelCoupled") ? document.getElementById("inputTelCoupled").value : "";
 
     let payload = { nombre: nombreDetectado, telefono: telDetectado };
     previewCoupled.innerText = JSON.stringify(payload);
@@ -231,7 +227,7 @@ btnS4ClearCoupled.addEventListener("click", () => {
 });
 
 // Escenario 5: Hits rápidos (acoplado - sin sincronización)
-let hitLogCoupledData = [];
+let hitLogCoupledData = []; // Mantenido solo para registro, el problema principal es la lectura del DOM
 
 sliderS5Coupled.addEventListener("input", (e) => {
     const mult = parseInt(e.target.value);
@@ -242,19 +238,20 @@ btnS5Coupled.addEventListener("click", () => {
     const mult = parseInt(sliderS5Coupled.value);
     const damage = 10 * mult;
     
-    // Lee del DOM (no-mvc)
-    let currentTotal = parseInt(totalHitsCoupled.innerText) || 0;
-    let currentCount = parseInt(hitCountCoupled.innerText) || 0;
-    
-    // Escribe directamente sin sincronización
-    totalHitsCoupled.innerText = currentTotal + damage;
-    hitCountCoupled.innerText = currentCount + 1;
-    
-    // El historial falla rápido
-    hitLogCoupledData.push(damage);
-    hitLogCoupled.innerText = hitLogCoupledData.join(" + ");
-    
-    telemetryLog.innerText = `[DOM] Golpe registrado (+${damage}). Total en pantalla: ${currentTotal + damage}. Golpes leídos: ${currentCount + 1}`;
+    // Al introducir un leve retardo, los clicks rápidos leen el DOM antes de que se actualice, 
+    // provocando desincronización y pérdida de golpes.
+    setTimeout(() => {
+        let currentTotal = parseInt(totalHitsCoupled.innerText) || 0;
+        let currentCount = parseInt(hitCountCoupled.innerText) || 0;
+        
+        totalHitsCoupled.innerText = currentTotal + damage;
+        hitCountCoupled.innerText = currentCount + 1;
+        
+        hitLogCoupledData.push(damage);
+        hitLogCoupled.innerText = hitLogCoupledData.join(" + ");
+        
+        telemetryLog.innerText = `[DOM] Golpe registrado (+${damage}). Total en pantalla: ${currentTotal + damage}. Golpes leídos: ${currentCount + 1}`;
+    }, 300);
 });
 
 btnS5ClearCoupled.addEventListener("click", () => {
@@ -265,18 +262,24 @@ btnS5ClearCoupled.addEventListener("click", () => {
     telemetryLog.innerText = "[DOM] Contador de golpes restablecido en el DOM.";
 });
 
-// Escenario 6: Selector de colores (acoplado)
-let colorHistoryCoupledData = [];
+// Escenario 6: Selector de colores (acoplado puro)
 
 colorPickerCoupled.addEventListener("change", (e) => {
     const color = e.target.value;
     const gradient = `linear-gradient(135deg, ${color}, #ffa500)`;
     gradientBoxCoupled.style.background = gradient;
     
-    colorHistoryCoupledData.push(color);
-    colorHistoryCoupled.innerText = colorHistoryCoupledData.join(", ");
-    colorCountCoupled.innerText = colorHistoryCoupledData.length;
-    telemetryLog.innerText = `[DOM] Color modificado directamente en el DOM: ${color}`;
+    // Lee y manipula el string visual directamente
+    let history = colorHistoryCoupled.innerText;
+    if (history === "—" || history === "") {
+        history = color;
+    } else {
+        history += ", " + color;
+    }
+    
+    colorHistoryCoupled.innerText = history;
+    colorCountCoupled.innerText = history.split(",").length;
+    telemetryLog.innerText = `[DOM] Color modificado leyendo el DOM: ${color}`;
 });
 
 btnS6ResetCoupled.addEventListener("click", () => {
@@ -285,7 +288,6 @@ btnS6ResetCoupled.addEventListener("click", () => {
     gradientBoxCoupled.style.background = gradient;
     colorHistoryCoupled.innerText = "—";
     colorCountCoupled.innerText = "0";
-    colorHistoryCoupledData = [];
     telemetryLog.innerText = "[DOM] Historial y color restablecidos en el DOM.";
 });
 
@@ -303,11 +305,14 @@ btnAddListCoupled.addEventListener("click", () => {
     
     const deleteBtn = li.querySelector(".btn-delete-coupled");
     deleteBtn.addEventListener("click", () => {
-        li.remove();
-        countCoupled.innerText = listContainerCoupled.children.length;
-        verifyCountCoupled.innerText = listContainerCoupled.children.length;
-        // Puede desincronizarse si hay muchos clicks rápidos
-        telemetryLog.innerText = `[DOM] Elemento eliminado directamente del DOM. Total: ${listContainerCoupled.children.length}`;
+        li.style.opacity = "0.4"; // Simula animación o borrado asíncrono
+        setTimeout(() => {
+            li.remove();
+            // Al leer la longitud sincronamente tras el borrado diferido, si borras varios rápido, esto falla.
+            countCoupled.innerText = listContainerCoupled.children.length;
+            verifyCountCoupled.innerText = listContainerCoupled.children.length;
+            telemetryLog.innerText = `[DOM] Elemento eliminado directamente del DOM. Total: ${listContainerCoupled.children.length}`;
+        }, 400);
     });
 
     listContainerCoupled.appendChild(li);

@@ -93,9 +93,9 @@ function renderizar() {
     const divisa = appState.s2.divisa;
     const saldoCalculado = appState.s2.saldoEuros * appState.tasas[divisa];
     
-    if (divisa === "EUR") totalMvc.innerText = saldoCalculado.toFixed(2) + " €";
-    else if (divisa === "USD") totalMvc.innerText = "$ " + saldoCalculado.toFixed(2);
-    else if (divisa === "JPY") totalMvc.innerText = "¥ " + Math.floor(saldoCalculado);
+    if (divisa === "EUR") totalMvc.innerText = "Total: " + saldoCalculado.toFixed(2) + " €";
+    else if (divisa === "USD") totalMvc.innerText = "Total: $ " + saldoCalculado.toFixed(2);
+    else if (divisa === "JPY") totalMvc.innerText = "Total: ¥ " + Math.floor(saldoCalculado);
 
     // Escenario 3
     if (appState.s3.pasoActual === 1) {
@@ -149,9 +149,18 @@ function renderizarListaMvc() {
     listContainerMvc.querySelectorAll(".btn-delete-item").forEach(btn => {
         btn.addEventListener("click", (e) => {
             const index = parseInt(e.target.getAttribute("data-index"));
+            
+            // Borrado del Modelo es inmediato y seguro
             appState.s7.items.splice(index, 1);
-            renderizarListaMvc();
-            telemetryLog.innerText = `[MVC] Elemento eliminado de la lista. Total: ${appState.s7.items.length}`;
+            
+            const li = e.target.parentElement;
+            li.style.opacity = "0.4"; // Simula animación
+            
+            // Renderizado asíncrono no causa desincronización
+            setTimeout(() => {
+                renderizarListaMvc();
+                telemetryLog.innerText = `[MVC] Elemento eliminado de la lista. Total en Modelo: ${appState.s7.items.length}`;
+            }, 400);
         });
     });
 }
@@ -247,7 +256,11 @@ btnS5Mvc.addEventListener("click", () => {
     appState.s5.hits.push(damage);
     
     telemetryLog.innerText = `[MVC] Golpe registrado (+${damage}). Total: ${appState.s5.totalDamage}. Golpes: ${appState.s5.hitCount}`;
-    renderizar();
+    
+    // El renderizado asíncrono no corrompe los datos porque el Modelo ya se actualizó
+    setTimeout(() => {
+        renderizar();
+    }, 300);
 });
 
 btnS5ClearMvc.addEventListener("click", () => {
