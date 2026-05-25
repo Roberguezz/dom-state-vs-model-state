@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Refactoring Lab: Solución Arquitectura MVC</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 40px;
+            background: #eef2f7;
+        }
+
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            align-items: center;
+        }
+
+        .completed {
+            text-decoration: line-through;
+            color: #a0aec0;
+        }
+
+        .error-box {
+            color: #e53e3e;
+            margin-top: 15px;
+            font-weight: bold;
+            font-size: 0.9em;
+            min-height: 20px;
+        }
+
+        input {
+            padding: 8px;
+            width: 70%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        button {
+            padding: 8px 12px;
+            background: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2b6cb0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Mis Tareas Universitarias (MVC OK)</h2>
+
+        <input type="text" id="taskInput" placeholder="Nueva tarea...">
+        <button id="addBtn">Agregar</button>
+
+        <div id="taskList"></div>
+        <div id="errorLog" class="error-box"></div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // 1. EL MODELO (Solo Datos, Lógica de Negocio y Estado Puro)
+        // =========================================================================
+        class TaskModel {
+            constructor() {
+                this.tasks = [
+                    { id: 1, title: "Estudiar para el examen", completed: false },
+                    { id: 2, title: "Entregar práctica de MVC", completed: true }
+                ];
+            }
+
+            // SOLUCIÓN ESCENARIO 1: El modelo decide cómo se estructuran y crean los datos internamente
+            addTask(title) {
+                const newTask = {
+                    id: Date.now(),
+                    title: title,
+                    completed: false
+                };
+                this.tasks.push(newTask);
+                return this.tasks;
+            }
+
+            // SOLUCIÓN ESCENARIO 2: No lee el DOM. Cambia el estado basándose únicamente en el ID recibido
+            toggleTask(id) {
+                const task = this.tasks.find(t => t.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                }
+                return this.tasks;
+            }
+
+            // SOLUCIÓN ESCENARIO 3: Retorna un booleano o un estado. NO manipula elementos HTML directamente
+            hasTooManyPendingTasks() {
+                const pendingCount = this.tasks.filter(t => !t.completed).length;
+                return pendingCount > 3;
+            }
+        }
+
+
+        // =========================================================================
+        // 2. LA VISTA (Solo Interfaz de Usuario, DOM y Eventos Nativos)
+        // =========================================================================
+        class TaskView {
+            constructor() {
+                this.input = document.getElementById('taskInput');
+                this.addBtn = document.getElementById('addBtn');
+                this.taskList = document.getElementById('taskList');
+                this.errorLog = document.getElementById('errorLog');
+            }
+
+            getInputValue() {
+                return this.input.value.trim();
+            }
+
+            clearInput() {
+                this.input.value = '';
+            }
+
+            // Pinta en pantalla la lista exacta que le ordene el Controlador
+            renderTasks(tasks) {
+                this.taskList.innerHTML = '';
+
+                tasks.forEach(task => {
+                    const div = document.createElement('div');
+                    div.className = 'task-item';
+
+                    // Usamos data-attributes para no acoplar lógica a IDs dinámicos en strings de onclick
+                    div.innerHTML = `
+                        <span class="${task.completed ? 'completed' : ''}">${task.title}</span>
+                        <button class="toggle-btn" data-id="${task.id}">Alternar</button>
+                    `;
+                    this.taskList.appendChild(div);
+                });
+            }
+
+            // Muestra u oculta el error visual según lo que dicte el controlador
+            renderError(hasError) {
+                if (hasError) {
+                    this.errorLog.innerText = "¡Error de negocio: Demasiadas tareas pendientes!";
+                } else {
+                    this.errorLog.innerText = "";
+                }
+            }
+
+            // Vincula el click de agregar al manejador que defina el Controlador
+            bindAddTask(handler) {
+                this.addBtn.addEventListener('click', () => {
+                    const title = this.getInputValue();
+                    if (title) {
+                        handler(title);
+                        this.clearInput();
+                    }
+                });
+            }
+
+            // Vincula los clicks de los botones "Alternar" delegando el evento en el contenedor principal
+            bindToggleTask(handler) {
+                this.taskList.addEventListener('click', (event) => {
+                    if (event.target.classList.contains('toggle-btn')) {
+                        const id = parseInt(event.target.getAttribute('data-id'));
+                        handler(id);
+                    }
+                });
+            }
+        }
+
+
+        // =========================================================================
+        // 3. EL CONTROLADOR (El Intermediario / Director de Orquesta)
+        // =========================================================================
+        class TaskController {
+            constructor(model, view) {
+                this.model = model;
+                this.view = view;
+
+                // 1. Renderizado inicial
+                this.updateView();
+
+                // 2. Unir Vista y Controlador mediante Callbacks / Eventos
+                this.view.bindAddTask(this.handleAddTask);
+                this.view.bindToggleTask(this.handleToggleTask);
+
+                // 3. Simulación de la validación automatizada de fondo (Escenario 3)
+                setInterval(() => this.handleValidation(), 2000);
+            }
+
+            // Helper para actualizar los componentes visuales de forma centralizada
+            updateView() {
+                this.view.renderTasks(this.model.tasks);
+                this.handleValidation();
+            }
+
+            // Manejador: Cuando el usuario añade una tarea
+            handleAddTask = (title) => {
+                this.model.addTask(title);
+                this.updateView();
+            }
+
+            // Manejador: Cuando el usuario alterna el estado de una tarea
+            handleToggleTask = (id) => {
+                this.model.toggleTask(id);
+                this.updateView();
+            }
+
+            // Manejador: Evalúa la regla de negocio del Modelo y le dice a la Vista qué pintar
+            handleValidation = () => {
+                const isLimitExceeded = this.model.hasTooManyPendingTasks();
+                this.view.renderError(isLimitExceeded);
+            }
+        }
+
+        // =========================================================================
+        // INICIALIZACIÓN DE LA APLICACIÓN
+        // =========================================================================
+        const app = new TaskController(new TaskModel(), new TaskView());
+
+    </script>
+</body>
+
+</html>

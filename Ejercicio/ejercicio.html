@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Refactoring Lab: Panel de Gestión de Tareas</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 40px;
+            background: #f4f4f9;
+        }
+
+        .container {
+            max-width: 500px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .task-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .completed {
+            text-decoration: line-line-through;
+            color: gray;
+        }
+
+        .error-box {
+            color: red;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Mis Tareas Universitarias</h2>
+
+        <input type="text" id="taskInput" placeholder="Nueva tarea...">
+        <button id="addBtn">Agregar</button>
+
+        <div id="taskList"></div>
+        <div id="errorLog" class="error-box"></div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // LAB DE REFACTORIZACIÓN: EL ANTIPATRÓN TOTAL (TODO ACOPLADO)
+        // =========================================================================
+
+        // "Estado" global mezclado de mala manera
+        let tasks = [
+            { id: 1, title: "Estudiar para el examen", completed: false },
+            { id: 2, title: "Entregar práctica de MVC", completed: true }
+        ];
+
+        // Renderizado inicial
+        renderTasks();
+
+        function renderTasks() {
+            const listContainer = document.getElementById('taskList');
+            listContainer.innerHTML = '';
+
+            tasks.forEach(task => {
+                const div = document.createElement('div');
+                div.className = 'task-item';
+                div.innerHTML = `
+                    <span class="${task.completed ? 'completed' : ''}">${task.title}</span>
+                    <button onclick="toggleTask(${task.id})">Alternar</button>
+                `;
+                listContainer.appendChild(div);
+            });
+        }
+
+        // Evento para agregar tarea
+        document.getElementById('addBtn').addEventListener('click', () => {
+            const input = document.getElementById('taskInput');
+            const title = input.value.trim();
+
+            if (title) {
+                // ESCENARIO ERROR 1: EL MODELO DEJA QUE LA VISTA DICTE LA ESTRUCTURA DE LOS DATOS
+                // ---------------------------------------------------------------------------------
+                // ERROR: Aquí la Vista está asumiendo el rol del Modelo al decidir cómo se crea 
+                // e inicializa el objeto "task" (id con Date.now(), completado en false, etc.). 
+                // Si mañana el backend cambia la estructura de una tarea, tendrás que buscar 
+                // eventos de botones en el HTML para arreglarlo. El Modelo debería proveer un método addTask(title).
+                const newTask = {
+                    id: Date.now(),
+                    title: title,
+                    completed: false
+                };
+                tasks.push(newTask);
+
+                input.value = '';
+                renderTasks();
+            }
+        });
+
+        // Evento para cambiar el estado de la tarea
+        function toggleTask(id) {
+            // ESCENARIO ERROR 2: LA LÓGICA DE NEGOCIO DEPENDE DIRECTAMENTE DEL DOM (A LA INVERSA)
+            // ---------------------------------------------------------------------------------
+            // ERROR: Para cambiar el estado en el "Modelo" (el array tasks), esta función va a 
+            // leer el DOM directamente para verificar si la interfaz tiene una clase CSS específica.
+            // ¡Peligro! Si un diseñador cambia el nombre de la clase 'completed' por 'is-done', 
+            // la lógica de negocio de la aplicación se rompe por completo. El Modelo debe ser agnóstico al CSS.
+            const taskElement = document.getElementById('taskList').querySelector(`[onclick="toggleTask(${id})"]`).previousElementSibling;
+
+            const isCompletedInUI = taskElement.classList.contains('completed');
+
+            // Modificamos el modelo basándonos en lo que había en el HTML visualmente... Mal.
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !isCompletedInUI;
+            }
+
+            renderTasks();
+        }
+
+        // ESCENARIO ERROR 3: EL MODELO INTENTA ACTUALIZAR LA VISTA DIRECTAMENTE (VIOLACIÓN DE FLUJO)
+        // ---------------------------------------------------------------------------------
+        // ERROR: Imagina que el Modelo detecta un error de datos de manera interna (por ejemplo, 
+        // una función que valida que no existan más de 5 tareas activas). Aquí, la función de negocio
+        // escribe directamente en un 'id' del DOM. Si el día de mañana migras la vista a React,
+        // Vue, o cambias el diseño del HTML, este método del modelo romperá la app con un "Cannot set properties of null".
+        function validateMaxTasks() {
+            if (tasks.filter(t => !t.completed).length > 3) {
+                // El modelo manipula el DOM directamente. Rompe el principio de desacoplamiento.
+                document.getElementById('errorLog').innerText = "¡Error de negocio: Demasiadas tareas pendientes!";
+                return false;
+            }
+            document.getElementById('errorLog').innerText = "";
+            return true;
+        }
+
+        // Simulación de una validación automatizada que corre de fondo
+        setInterval(() => {
+            validateMaxTasks();
+        }, 2000);
+
+    </script>
+</body>
+
+</html>
