@@ -21,12 +21,11 @@ const btnNextCoupled = document.getElementById("btnNextCoupled");
 const btnS3Coupled = document.getElementById("btnS3Coupled");
 const previewCoupled = document.getElementById("previewCoupled");
 
-// Escenario 4: Sincronización multivista
-const btnS4AddCoupled = document.getElementById("btnS4AddCoupled");
+// Escenario 4: Combate RPG acoplado al DOM
+const btnS4Coupled = document.getElementById("btnS4Coupled");
 const btnS4ClearCoupled = document.getElementById("btnS4ClearCoupled");
-const cartBadgeCoupled = document.getElementById("cartBadgeCoupled");
-const cartListCoupled = document.getElementById("cartListCoupled");
-const cartTotalCoupled = document.getElementById("cartTotalCoupled");
+const totalDmgCoupled = document.getElementById("totalDmgCoupled");
+const dummySpriteCoupled = document.getElementById("dummySpriteCoupled");
 
 const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
                      <input type="text" id="inputNombreCoupled" class="input" placeholder="Ej. Carlos Mendoza">`;
@@ -35,7 +34,7 @@ const HTML_STEP_2 = `<label class="form-label">Número Telefónico Corporativo:<
 
 let coupledStep = 1;
 let tempTelefono = ""; 
-let coupledCartItems = [];
+let coupledLastHitTime = 0;
 
 function reiniciarTodo() {
     barCoupled.style.width = "0px";
@@ -48,10 +47,10 @@ function reiniciarTodo() {
     previewCoupled.innerText = "null";
     coupledStep = 1;
     tempTelefono = "";
-    coupledCartItems = [];
-    cartBadgeCoupled.innerText = "0";
-    cartListCoupled.innerHTML = `<li class="cart-empty">Sin elementos</li>`;
-    cartTotalCoupled.innerText = "$ 0.00";
+    coupledLastHitTime = 0;
+    totalDmgCoupled.innerText = "0";
+    dummySpriteCoupled.innerText = "(*'-'*)";
+    dummySpriteCoupled.style.color = "var(--text-dark)";
     irAPaso1();
 }
 
@@ -142,36 +141,54 @@ btnS3Coupled.addEventListener("click", () => {
     telemetryLog.innerText = "[DOM] Datos extraídos realizando consultas de nodos activos directamente en el DOM.";
 });
 
-// Escenario 4: Sincronización manual multipunto en la vista
-btnS4AddCoupled.addEventListener("click", () => {
-    const index = coupledCartItems.length + 1;
-    const newItem = { id: index, name: `Item #${index}`, price: 49.99 };
-    coupledCartItems.push(newItem);
+// Escenario 4: Combate RPG acoplado al DOM (Falla con NaN por el prefijo de combo)
+btnS4Coupled.addEventListener("click", () => {
+    const currentTime = Date.now();
+    const comboActive = (currentTime - coupledLastHitTime) < 1000;
+    coupledLastHitTime = currentTime;
 
-    // Modificación manual de vistas en el DOM
-    cartBadgeCoupled.innerText = coupledCartItems.length;
+    // Lee el marcador de daño actual directamente del DOM
+    let textVal = totalDmgCoupled.innerText;
+    let currentDmg = parseFloat(textVal);
 
-    if (coupledCartItems.length === 1) {
-        cartListCoupled.innerHTML = ""; 
+    // Si la pantalla ya muestra un error NaN, abortar
+    if (isNaN(currentDmg)) {
+        telemetryLog.innerText = "[DOM] ERROR: Operación fallida. El total en el DOM ya se encuentra corrupto con NaN.";
+        totalDmgCoupled.style.color = "var(--flat-red)";
+        dummySpriteCoupled.innerText = "x_x";
+        dummySpriteCoupled.style.color = "var(--flat-red)";
+        return;
     }
-    const li = document.createElement("li");
-    li.className = "cart-item";
-    li.innerHTML = `<span>${newItem.name}</span><span class="cart-item-price">$ ${newItem.price.toFixed(2)}</span>`;
-    cartListCoupled.appendChild(li);
 
-    let total = 0;
-    coupledCartItems.forEach(item => total += item.price);
-    cartTotalCoupled.innerText = `$ ${total.toFixed(2)}`;
+    let baseDamage = 20;
 
-    telemetryLog.innerText = "[DOM] Elementos Badge, Lista y Total del DOM actualizados de forma secuencial e imperativa.";
+    if (comboActive) {
+        let addedDamage = baseDamage * 2;
+        let newTotal = currentDmg + addedDamage;
+        
+        // Escribe el string formateado directamente en el DOM
+        totalDmgCoupled.innerText = `¡COMBO! ${newTotal}`;
+        dummySpriteCoupled.innerText = "(*>.<*)";
+        dummySpriteCoupled.style.color = "var(--flat-red)";
+        
+        telemetryLog.innerText = "[DOM] ¡Golpe de combo! Marcador en pantalla actualizado a string con texto.";
+    } else {
+        let newTotal = currentDmg + baseDamage;
+        totalDmgCoupled.innerText = newTotal;
+        dummySpriteCoupled.innerText = "(*o* )";
+        dummySpriteCoupled.style.color = "var(--text-dark)";
+        
+        telemetryLog.innerText = `[DOM] Golpe registrado en pantalla. Total actualizado a: ${newTotal}`;
+    }
 });
 
 btnS4ClearCoupled.addEventListener("click", () => {
-    coupledCartItems = [];
-    cartBadgeCoupled.innerText = "0";
-    cartListCoupled.innerHTML = `<li class="cart-empty">Sin elementos</li>`;
-    cartTotalCoupled.innerText = "$ 0.00";
-    telemetryLog.innerText = "[DOM] Colección vaciada y nodos restablecidos individualmente en el DOM.";
+    coupledLastHitTime = 0;
+    totalDmgCoupled.innerText = "0";
+    totalDmgCoupled.style.color = "var(--text-dark)";
+    dummySpriteCoupled.innerText = "(*'-'*)";
+    dummySpriteCoupled.style.color = "var(--text-dark)";
+    telemetryLog.innerText = "[DOM] Muñeco de pruebas restablecido en el DOM. Marcador reseteado a 0.";
 });
 
 btnResetAll.addEventListener("click", reiniciarTodo);

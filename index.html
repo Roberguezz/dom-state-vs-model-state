@@ -301,10 +301,10 @@ function renderPaso1() {
 
         <!-- ESCENARIO 04 -->
         <section class="section" id="escenario4">
-            <div class="section-badge">04 // COMPLEJIDAD DE LA VISTA</div>
-            <h2>Sincronización Multivista</h2>
+            <div class="section-badge">04 // COMBATE RPG Y MULTIPLICADOR DE COMBO</div>
+            <h2>Combate RPG y Multiplicador de Combo</h2>
             <p class="description">
-                Cuando múltiples elementos independientes de la interfaz deben reflejar el mismo cambio (como un contador numérico de items, un listado detallado y el importe total de la compra), modificar cada nodo del DOM de forma manual e imperativa incrementa la complejidad del código. Centralizar los datos en el Modelo permite que una única función renderice y mantenga la coherencia de todas las vistas automáticamente al mutar el estado en memoria.
+                <strong>Un consejo de colega:</strong> Imagina que estás programando un minijuego RPG de combate y añades una mecánica de combos rápidos que escribe en el marcador de daño el texto: <code>"¡COMBO! 120"</code>. En la versión acoplada al DOM, para registrar el daño del siguiente golpe, el código debe leer el texto visible en la pantalla e intentar parsearlo. Sin embargo, al procesar la cadena con letras (<code>"¡COMBO! 120"</code>), el parser falla y devuelve un error <strong>NaN</strong>, destruyendo el combate de inmediato. Con un Modelo en memoria, la matemática de daño se procesa aislada en variables de JS puros, volviendo el sistema inmune a cómo se dibuje la pantalla. Haz clics rápidos en ambos paneles y verás la diferencia.
             </p>
             
             <div class="grid">
@@ -313,28 +313,17 @@ function renderPaso1() {
                         <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
-                        <!-- Vista 1 -->
-                        <div class="cart-header-widget flex-between">
-                            <span class="widget-title">Resumen de selección</span>
-                            <span class="badge badge-red" id="cartBadgeCoupled">0</span>
-                        </div>
-                        
-                        <!-- Vista 2 -->
-                        <div class="sandbox cart-sandbox">
-                            <ul id="cartListCoupled" class="cart-list">
-                                <li class="cart-empty">Sin elementos</li>
-                            </ul>
-                        </div>
-                        
-                        <!-- Vista 3 -->
-                        <div class="cart-total-bar flex-between">
-                            <span class="total-label">Total acumulado:</span>
-                            <span class="total-display text-red" id="cartTotalCoupled">$ 0.00</span>
+                        <!-- Vista RPG acoplada -->
+                        <div class="rpg-sandbox">
+                            <div class="dummy-display">
+                                <span id="dummySpriteCoupled" class="dummy-sprite">(*'-'*)</span>
+                            </div>
+                            <div class="damage-display text-red" id="totalDmgCoupled">0</div>
                         </div>
 
                         <div class="form-actions space-top">
-                            <button id="btnS4AddCoupled" class="btn btn-primary">Añadir elemento (+$49.99)</button>
-                            <button id="btnS4ClearCoupled" class="btn btn-secondary">Vaciar selección</button>
+                            <button id="btnS4Coupled" class="btn btn-primary">¡Atacar!</button>
+                            <button id="btnS4ClearCoupled" class="btn btn-secondary">Restaurar muñeco</button>
                         </div>
                     </div>
                 </div>
@@ -344,28 +333,17 @@ function renderPaso1() {
                         <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
-                        <!-- Vista 1 -->
-                        <div class="cart-header-widget flex-between">
-                            <span class="widget-title">Resumen de selección</span>
-                            <span class="badge badge-green" id="cartBadgeMvc">0</span>
-                        </div>
-                        
-                        <!-- Vista 2 -->
-                        <div class="sandbox cart-sandbox">
-                            <ul id="cartListMvc" class="cart-list">
-                                <li class="cart-empty">Sin elementos</li>
-                            </ul>
-                        </div>
-                        
-                        <!-- Vista 3 -->
-                        <div class="cart-total-bar flex-between">
-                            <span class="total-label">Total acumulado:</span>
-                            <span class="total-display text-green" id="cartTotalMvc">$ 0.00</span>
+                        <!-- Vista RPG MVC -->
+                        <div class="rpg-sandbox">
+                            <div class="dummy-display">
+                                <span id="dummySpriteMvc" class="dummy-sprite">(*'-'*)</span>
+                            </div>
+                            <div class="damage-display text-green" id="totalDmgMvc">0</div>
                         </div>
 
                         <div class="form-actions space-top">
-                            <button id="btnS4AddMvc" class="btn btn-primary">Añadir elemento (+$49.99)</button>
-                            <button id="btnS4ClearMvc" class="btn btn-secondary">Vaciar selección</button>
+                            <button id="btnS4Mvc" class="btn btn-primary">¡Atacar!</button>
+                            <button id="btnS4ClearMvc" class="btn btn-secondary">Restaurar muñeco</button>
                         </div>
                     </div>
                 </div>
@@ -381,42 +359,42 @@ function renderPaso1() {
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// Inserción manual a múltiples elementos del DOM
-cartBadgeCoupled.innerText = coupledCartItems.length;
+                        <pre class="language-javascript"><code class="language-javascript">// Lee el marcador de daño directo de la pantalla
+let textVal = totalDmgCoupled.innerText;
+let currentDmg = parseFloat(textVal); // ¡COMBO! 120 -> NaN
 
-const li = document.createElement("li");
-li.innerHTML = `<span>${newItem.name}</span><span>$${newItem.price}</span>`;
-cartListCoupled.appendChild(li);
+let baseDamage = 20;
+let addedDamage = comboActive ? (baseDamage * 2) : baseDamage;
 
-let total = 0;
-coupledCartItems.forEach(item => total += item.price);
-cartTotalCoupled.innerText = `$ ${total.toFixed(2)}`;</code></pre>
+// Escribe el string formateado directamente en la pantalla
+totalDmgCoupled.innerText = `¡COMBO! ${currentDmg + addedDamage}`;</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// 1. Modificación exclusiva de la colección en el Modelo
-appState.s4.items.push(nuevoItem);
+                        <pre class="language-javascript"><code class="language-javascript">// Mutamos la variable numérica en memoria de forma segura
+appState.s4.damage += hitDamage;
+appState.s4.isCombo = comboActive;
 
-// 2. Renderizado unificado de todos los elementos visuales
-function renderizar() {
-    cartBadgeMvc.innerText = appState.s4.items.length;
-    cartListMvc.innerHTML = appState.s4.items.map(renderItemHtml).join("");
-    cartTotalMvc.innerText = `$ ${calcularTotal().toFixed(2)}`;
+// La vista se limita a renderizar el estado del Modelo
+if (appState.s4.isCombo) {
+    totalDmgMvc.innerText = `¡COMBO! ${appState.s4.damage}`;
+} else {
+    totalDmgMvc.innerText = appState.s4.damage;
 }</code></pre>
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>Explicación:</strong> En el código acoplado, el controlador debe actualizar explícitamente cada nodo de la interfaz de manera secuencial e imperativa. En el modelo desacoplado, la vista es una proyección pura del Modelo. Añadir nuevas vistas adicionales no altera los controladores existentes.</p>
+                    <p><strong>Explicación:</strong> En la versión acoplada, al encadenar golpes rápidos, el DOM recibe texto decorativo ("¡COMBO! 80"). En el siguiente ataque, el código intenta recuperar el acumulado leyendo el elemento del DOM y parseándolo, provocando un error matemático irreversible <code>NaN</code>. Al separar el estado en un Modelo numérico puro, la lógica de cálculo permanece a salvo del renderizado y el flujo nunca se interrumpe.</p>
                 </div>
             </details>
         </section>
     </div>
 
-    <!-- Barra de Eventos de Interacción Simple -->
+    <!-- Barra de Eventos de Interacción Simple (Consola) -->
     <div class="telemetry-bar">
         <div class="telemetry-brand">
             <span class="pulse-indicator"></span>
-            <span class="telemetry-tag">LOG DE EVENTOS //</span>
+            <span class="telemetry-tag">CONSOLA //</span>
         </div>
         <span id="telemetryMsg" class="telemetry-message">Listo. Esperando interacciones en la página...</span>
     </div>

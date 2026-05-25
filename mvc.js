@@ -19,12 +19,11 @@ const btnNextMvc = document.getElementById("btnNextMvc");
 const btnS3Mvc = document.getElementById("btnS3Mvc");
 const previewMvc = document.getElementById("previewMvc");
 
-// Escenario 4: Sincronización multivista
-const btnS4AddMvc = document.getElementById("btnS4AddMvc");
+// Escenario 4: Combate RPG desacoplado (MVC)
+const btnS4Mvc = document.getElementById("btnS4Mvc");
 const btnS4ClearMvc = document.getElementById("btnS4ClearMvc");
-const cartBadgeMvc = document.getElementById("cartBadgeMvc");
-const cartListMvc = document.getElementById("cartListMvc");
-const cartTotalMvc = document.getElementById("cartTotalMvc");
+const totalDmgMvc = document.getElementById("totalDmgMvc");
+const dummySpriteMvc = document.getElementById("dummySpriteMvc");
 
 const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
                      <input type="text" id="inputNombreMvc" name="nombre" class="input" placeholder="Ej. Carlos Mendoza">`;
@@ -36,7 +35,7 @@ const appState = {
     s1: { progreso: 0, nivel: 1 },
     s2: { saldoEuros: 0.0, divisa: "EUR" },
     s3: { pasoActual: 1, formulario: { nombre: "", telefono: "" } },
-    s4: { items: [] },
+    s4: { damage: 0, lastHitTime: 0, isCombo: false },
     tasas: { EUR: 1.0, USD: 1.10, JPY: 160.0 }
 };
 
@@ -44,7 +43,7 @@ function resetearEstructura() {
     appState.s1 = { progreso: 0, nivel: 1 };
     appState.s2 = { saldoEuros: 0.0, divisa: "EUR" };
     appState.s3 = { pasoActual: 1, formulario: { nombre: "", telefono: "" } };
-    appState.s4 = { items: [] };
+    appState.s4 = { damage: 0, lastHitTime: 0, isCombo: false };
     selectS2Mvc.value = "EUR";
     wrapperMvc.style.width = "100px";
     previewMvc.innerText = "null";
@@ -79,19 +78,15 @@ function renderizar() {
     }
 
     // Escenario 4
-    cartBadgeMvc.innerText = appState.s4.items.length;
-    if (appState.s4.items.length === 0) {
-        cartListMvc.innerHTML = `<li class="cart-empty">Sin elementos</li>`;
+    if (appState.s4.isCombo) {
+        totalDmgMvc.innerText = `¡COMBO! ${appState.s4.damage}`;
+        dummySpriteMvc.innerText = "(*>.<*)";
+        dummySpriteMvc.style.color = "var(--flat-green)";
     } else {
-        cartListMvc.innerHTML = appState.s4.items.map(item => `
-            <li class="cart-item">
-                <span>${item.name}</span>
-                <span class="cart-item-price">$ ${item.price.toFixed(2)}</span>
-            </li>
-        `).join("");
+        totalDmgMvc.innerText = appState.s4.damage;
+        dummySpriteMvc.innerText = appState.s4.damage > 0 ? "(*o* )" : "(*'-'*)";
+        dummySpriteMvc.style.color = "var(--text-dark)";
     }
-    const totalCarrito = appState.s4.items.reduce((sum, item) => sum + item.price, 0);
-    cartTotalMvc.innerText = `$ ${totalCarrito.toFixed(2)}`;
 }
 
 // CONTROLADOR: Gestores de eventos
@@ -142,21 +137,31 @@ btnS3Mvc.addEventListener("click", () => {
     telemetryLog.innerText = "[MVC] Formulario exportado desde el Modelo.";
 });
 
-// Controladores del Escenario 4
-btnS4AddMvc.addEventListener("click", () => {
-    const index = appState.s4.items.length + 1;
-    appState.s4.items.push({
-        id: index,
-        name: `Item #${index}`,
-        price: 49.99
-    });
-    telemetryLog.innerText = "[MVC] Elemento añadido al Modelo. Vistas sincronizadas automáticamente.";
+// Controladores del Escenario 4 (MVC)
+btnS4Mvc.addEventListener("click", () => {
+    const currentTime = Date.now();
+    const comboActive = (currentTime - appState.s4.lastHitTime) < 1000;
+    appState.s4.lastHitTime = currentTime;
+
+    let baseDamage = 20;
+    let hitDamage = comboActive ? (baseDamage * 2) : baseDamage;
+
+    // Mutamos la variable numérica en memoria de forma segura
+    appState.s4.damage += hitDamage;
+    appState.s4.isCombo = comboActive;
+
+    telemetryLog.innerText = comboActive 
+        ? `[MVC] ¡Golpe de combo! Daño de ataque duplicado (+40) y acumulado en memoria.` 
+        : `[MVC] Golpe registrado en el Modelo (+20). Total en memoria: ${appState.s4.damage}`;
+
     renderizar();
 });
 
 btnS4ClearMvc.addEventListener("click", () => {
-    appState.s4.items = [];
-    telemetryLog.innerText = "[MVC] Carrito vaciado en el Modelo. Vistas sincronizadas automáticamente.";
+    appState.s4.damage = 0;
+    appState.s4.lastHitTime = 0;
+    appState.s4.isCombo = false;
+    telemetryLog.innerText = "[MVC] Muñeco de pruebas restablecido en el Modelo. Daño en memoria puesto a 0.";
     renderizar();
 });
 
