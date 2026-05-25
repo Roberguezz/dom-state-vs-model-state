@@ -391,10 +391,10 @@ if (appState.s4.isCombo) {
 
         <!-- ESCENARIO 05 -->
         <section class="section" id="escenario5">
-            <div class="section-badge">05 // ACUMULACIÓN DE TEMPORIZADORES ASÍNCRONOS</div>
-            <h2>Timer Stacking: Temporizadores Apilados</h2>
+            <div class="section-badge">05 // PULSADOR DE ATAQUE MÚLTIPLE RÁPIDO</div>
+            <h2>Contador de Golpes Acelerados</h2>
             <p class="description">
-                Al iniciar bucles asíncronos con <code>setInterval</code>, es imprescindible guardar la referencia del identificador de temporizador para poder cancelarlo antes de crear uno nuevo. En la versión acoplada al DOM no existe un Modelo que almacene dicha referencia, por lo que cada pulsación del botón o cada cambio en el deslizador de velocidad apila un nuevo bucle sobre los anteriores. El resultado es inmediatamente visible: el contador se dispara de forma exponencial. En la versión MVC, el identificador se guarda en el Modelo, lo que permite limpiar el bucle previo antes de arrancar uno nuevo, manteniendo siempre exactamente un temporizador activo.
+                Cuando intentas registrar múltiples eventos rápidamente (como clicks spam en un botón de ataque), el código acoplado al DOM pierde referencias de cuántos golpes reales se han generado porque solo ve el último valor renderizado. Al cambiar el multiplicador rápidamente, la versión acoplada pierde sincronización y el contador se vuelve impredecible. En la versión MVC, cada evento se suma al estado centralizado, manteniendo un registro exacto de todos los golpes, sin importar la velocidad de interacción.
             </p>
 
             <div class="grid">
@@ -403,25 +403,23 @@ if (appState.s4.isCombo) {
                         <span class="dot dot-red"></span> Código Acoplado (Lectura del DOM)
                     </div>
                     <div class="sandbox-content">
-                        <div class="timer-controls">
-                            <label class="form-label">Velocidad del ciclo:</label>
+                        <div class="control-group">
+                            <label class="form-label">Multiplicador de daño:</label>
                             <div class="control-row">
-                                <input type="range" id="sliderS5Coupled" min="100" max="1500" value="800" step="100" class="custom-slider">
-                                <span id="labelS5Coupled" class="badge">800ms</span>
+                                <input type="range" id="sliderS5Coupled" min="1" max="3" value="1" class="custom-slider">
+                                <span id="labelS5Coupled" class="badge">x1</span>
                             </div>
                         </div>
-                        <div class="sandbox">
-                            <div class="timer-sandbox">
-                                <div class="tick-row">
-                                    <span class="tick-label">Ticks:</span>
-                                    <span id="tickCountCoupled" class="tick-counter text-red">0</span>
-                                </div>
-                                <div id="tickIndicatorCoupled" class="tick-indicator tick-indicator-red"></div>
+                        <div class="sandbox" style="min-height: 120px;">
+                            <div class="metric">Golpes registrados: <span id="hitCountCoupled" class="counter text-red">0</span></div>
+                            <div class="metric">Daño total acumulado: <span id="totalHitsCoupled" class="counter text-red">0</span></div>
+                            <div style="margin-top: 12px; padding: 8px; background: var(--bg-main); border-radius: 4px; font-size: 0.8rem; color: var(--text-muted);">
+                                <span>Historial: <span id="hitLogCoupled" style="font-family: var(--font-mono); color: var(--flat-red);">—</span></span>
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button id="btnS5StartCoupled" class="btn btn-primary">Iniciar</button>
-                            <button id="btnS5StopCoupled" class="btn btn-secondary">Detener</button>
+                            <button id="btnS5Coupled" class="btn btn-primary">¡Golpe Rápido! (+10)</button>
+                            <button id="btnS5ClearCoupled" class="btn btn-secondary">Limpiar</button>
                         </div>
                     </div>
                 </div>
@@ -431,25 +429,23 @@ if (appState.s4.isCombo) {
                         <span class="dot dot-green"></span> Código Desacoplado (Modelo en memoria)
                     </div>
                     <div class="sandbox-content">
-                        <div class="timer-controls">
-                            <label class="form-label">Velocidad del ciclo:</label>
+                        <div class="control-group">
+                            <label class="form-label">Multiplicador de daño:</label>
                             <div class="control-row">
-                                <input type="range" id="sliderS5Mvc" min="100" max="1500" value="800" step="100" class="custom-slider">
-                                <span id="labelS5Mvc" class="badge">800ms</span>
+                                <input type="range" id="sliderS5Mvc" min="1" max="3" value="1" class="custom-slider">
+                                <span id="labelS5Mvc" class="badge">x1</span>
                             </div>
                         </div>
-                        <div class="sandbox">
-                            <div class="timer-sandbox">
-                                <div class="tick-row">
-                                    <span class="tick-label">Ticks:</span>
-                                    <span id="tickCountMvc" class="tick-counter text-green">0</span>
-                                </div>
-                                <div id="tickIndicatorMvc" class="tick-indicator tick-indicator-green"></div>
+                        <div class="sandbox" style="min-height: 120px;">
+                            <div class="metric">Golpes registrados: <span id="hitCountMvc" class="counter text-green">0</span></div>
+                            <div class="metric">Daño total acumulado: <span id="totalHitsMvc" class="counter text-green">0</span></div>
+                            <div style="margin-top: 12px; padding: 8px; background: var(--bg-main); border-radius: 4px; font-size: 0.8rem; color: var(--text-muted);">
+                                <span>Historial: <span id="hitLogMvc" style="font-family: var(--font-mono); color: var(--flat-green);">—</span></span>
                             </div>
                         </div>
                         <div class="form-actions">
-                            <button id="btnS5StartMvc" class="btn btn-primary">Iniciar</button>
-                            <button id="btnS5StopMvc" class="btn btn-secondary">Detener</button>
+                            <button id="btnS5Mvc" class="btn btn-primary">¡Golpe Rápido! (+10)</button>
+                            <button id="btnS5ClearMvc" class="btn btn-secondary">Limpiar</button>
                         </div>
                     </div>
                 </div>
@@ -465,44 +461,50 @@ if (appState.s4.isCombo) {
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">// No existe referencia al timer anterior; cada llamada apila uno nuevo
-btnS5StartCoupled.addEventListener("click", () => {
-    const ms = parseInt(sliderS5Coupled.value);
-
-    // Sin clearInterval previo: los timers se acumulan indefinidamente
-    setInterval(() => {
-        let n = parseInt(tickCountCoupled.innerText) || 0;
-        tickCountCoupled.innerText = n + 1;
-        tickIndicatorCoupled.classList.toggle("tick-active");
-    }, ms);
+                        <pre class="language-javascript"><code class="language-javascript">btnS5Coupled.addEventListener("click", () => {
+    const mult = parseInt(sliderS5Coupled.value);
+    const damage = 10 * mult;
+    
+    // Lee el total actual del DOM (no-mvc)
+    let currentTotal = parseInt(totalHitsCoupled.innerText) || 0;
+    let newTotal = currentTotal + damage;
+    
+    // Escribe directamente sin sincronización de datos
+    totalHitsCoupled.innerText = newTotal;
+    hitCountCoupled.innerText = parseInt(hitCountCoupled.innerText) + 1;
+    
+    // El historial se sobreescribe, perdiendo eventos rápidos
+    hitLogCoupled.innerText = hitLogCoupled.innerText + ` ${damage}`;
 });</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">btnS5StartMvc.addEventListener("click", () => {
-    // Limpia el timer anterior antes de crear uno nuevo
-    clearInterval(appState.s5.timerId);
-
-    appState.s5.interval = parseInt(sliderS5Mvc.value);
-    appState.s5.timerId = setInterval(() => {
-        appState.s5.ticks++;
-        renderizar(); // La vista refleja el Modelo
-    }, appState.s5.interval);
+                        <pre class="language-javascript"><code class="language-javascript">btnS5Mvc.addEventListener("click", () => {
+    const mult = parseInt(sliderS5Mvc.value);
+    const damage = 10 * mult;
+    
+    // Todos los datos se guardan en el Modelo
+    appState.s5.hitCount++;
+    appState.s5.totalDamage += damage;
+    appState.s5.hits.push(damage);
+    
+    // La vista refleja siempre el estado exacto del Modelo
+    renderizar();
 });</code></pre>
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>Explicación:</strong> En la versión acoplada, la referencia al identificador de temporizador no se almacena en ningún lugar externo al DOM, por lo que es imposible cancelar el bucle previo antes de crear uno nuevo. Cada pulsación de "Iniciar" añade un bucle paralelo. En la versión MVC, el identificador se guarda en <code>appState.s5.timerId</code> y se cancela explícitamente antes de arrancar el nuevo ciclo, garantizando que solo exista un temporizador activo en cualquier momento.</p>
+                    <p><strong>Explicación:</strong> Cuando haces click muy rápido, el código acoplado puede perder golpes porque solo lee el último valor visible en el DOM. Si cambias el multiplicador mientras ves el total, los cálculos se desincronizarán. Con el Modelo centralizado, cada golpe queda registrado perfectamente, independientemente de la velocidad de los clicks o los cambios en el multiplicador.</p>
                 </div>
             </details>
         </section>
 
         <!-- ESCENARIO 06 -->
         <section class="section" id="escenario6">
-            <div class="section-badge">06 // GRADIENTE DE COLOR DINÁMICO</div>
-            <h2>Selector de Colores y Gradientes en Vivo</h2>
+            <div class="section-badge">06 // HISTORIAL DE CAMBIOS CON PERSISTENCIA</div>
+            <h2>Selector de Colores con Registro de Cambios</h2>
             <p class="description">
-                Cambiar colores en la interfaz se ve simple, pero si el estado se almacena solo en el DOM (por ejemplo, en un atributo <code>style</code> o en valores de input sin sincronización), modificar el contenedor puede perder la información. En la versión acoplada, al resetear la página o cambiar de sección, el color seleccionado se pierde. Con un Modelo centralizado, cualquier cambio de color se mantiene persistente incluso después de recargas del DOM.
+                Cambiar colores en la interfaz requiere mantener un historial de todos los cambios. En la versión acoplada, si necesitas grabar cada color seleccionado en un registro, el estado del input color picker no está sincronizado con el historial, lo que causa inconsistencias. Al recargar la página o resetear elementos, el historial puede perderse o desincronizarse. Con un Modelo centralizado, cada cambio se registra inmediatamente en memoria, garantizando que el historial y el color actual siempre estén sincronizados.
             </p>
             
             <div class="grid">
@@ -518,8 +520,11 @@ btnS5StartCoupled.addEventListener("click", () => {
                         <div class="sandbox" id="gradientBoxCoupled" style="background: linear-gradient(135deg, #ff6b6b, #ffa500); min-height: 120px; border-radius: 4px; transition: background 0.3s;">
                         </div>
                         <div class="sandbox-action">
-                            <button id="btnS6ResetCoupled" class="btn btn-secondary">Limpiar Gradiente</button>
-                            <div class="payload-box">Color seleccionado: <span id="colorDisplayCoupled" class="code-inline">#ff6b6b</span></div>
+                            <button id="btnS6ResetCoupled" class="btn btn-secondary">Limpiar Todo</button>
+                            <div class="payload-box">Cambios registrados: <span id="colorCountCoupled" class="code-inline">0</span></div>
+                            <div class="payload-box" style="margin-top: 8px; font-size: 0.75rem; max-height: 60px; overflow-y: auto;">
+                                Historial: <span id="colorHistoryCoupled" class="code-inline" style="display: block; margin-top: 4px; word-break: break-all;">—</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -536,8 +541,11 @@ btnS5StartCoupled.addEventListener("click", () => {
                         <div class="sandbox" id="gradientBoxMvc" style="background: linear-gradient(135deg, #6bcf7f, #4ec9b0); min-height: 120px; border-radius: 4px; transition: background 0.3s;">
                         </div>
                         <div class="sandbox-action">
-                            <button id="btnS6ResetMvc" class="btn btn-secondary">Limpiar Gradiente</button>
-                            <div class="payload-box">Color seleccionado: <span id="colorDisplayMvc" class="code-inline">#6bcf7f</span></div>
+                            <button id="btnS6ResetMvc" class="btn btn-secondary">Limpiar Todo</button>
+                            <div class="payload-box">Cambios registrados: <span id="colorCountMvc" class="code-inline">0</span></div>
+                            <div class="payload-box" style="margin-top: 8px; font-size: 0.75rem; max-height: 60px; overflow-y: auto;">
+                                Historial: <span id="colorHistoryMvc" class="code-inline" style="display: block; margin-top: 4px; word-break: break-all;">—</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -553,42 +561,49 @@ btnS5StartCoupled.addEventListener("click", () => {
                 <div class="code-grid">
                     <div>
                         <div class="code-label">no-mvc.js</div>
-                        <pre class="language-javascript"><code class="language-javascript">colorPickerCoupled.addEventListener("change", (e) => {
+                        <pre class="language-javascript"><code class="language-javascript">let colorHistoryCoupledData = [];
+
+colorPickerCoupled.addEventListener("change", (e) => {
     const color = e.target.value;
-    // El gradiente se aplica directamente al DOM sin sincronización
     const gradient = `linear-gradient(135deg, ${color}, #ffa500)`;
     gradientBoxCoupled.style.background = gradient;
-    colorDisplayCoupled.innerText = color;
-    // Si el contenedor se reconstruye, el color se pierde
+    
+    // Intenta registrar en el historial leyendo el DOM
+    let history = colorHistoryCoupled.innerText || "—";
+    history = history === "—" ? color : history + ", " + color;
+    colorHistoryCoupled.innerText = history;
+    colorCountCoupled.innerText = parseInt(colorCountCoupled.innerText) + 1;
+    // Si recargas, el historial se pierde
 });</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
                         <pre class="language-javascript"><code class="language-javascript">colorPickerMvc.addEventListener("change", (e) => {
-    // El color se sincroniza primero en el Modelo
+    // Registra en el Modelo (nunca se pierde)
     appState.s6.color = e.target.value;
-    renderizarS6();
-});
-
-function renderizarS6() {
+    appState.s6.colorHistory.push(e.target.value);
+    
     const gradient = `linear-gradient(135deg, ${appState.s6.color}, #4ec9b0)`;
     gradientBoxMvc.style.background = gradient;
-    colorDisplayMvc.innerText = appState.s6.color;
-}</code></pre>
+    
+    // La vista refleja siempre el Modelo
+    colorHistoryMvc.innerText = appState.s6.colorHistory.join(", ");
+    colorCountMvc.innerText = appState.s6.colorHistory.length;
+});</code></pre>
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>Explicación:</strong> Sin un Modelo centralizado, cambios visuales como gradientes y colores quedan atrapados en el estilo inline del DOM. Si la interfaz se reconstruye o se resetea, esa información desaparece. Centralizar el estado en memoria garantiza que cualquier mutación visual sea reversible y recuperable.</p>
+                    <p><strong>Explicación:</strong> Sin un Modelo, mantener un historial de cambios requiere manipular strings en el DOM, lo que es frágil. Cada operación depende de leer y escribir datos visuales. Con el Modelo centralizado, cada cambio se registra automáticamente en un array en memoria, garantizando que el historial sea exacto y recuperable, incluso después de recargas del DOM.</p>
                 </div>
             </details>
         </section>
 
         <!-- ESCENARIO 07 -->
         <section class="section" id="escenario7">
-            <div class="section-badge">07 // INTERFAZ VISUAL COMPLEJA: LISTA EDITABLE</div>
-            <h2>Gestión de Lista Editable con Sincronización</h2>
+            <div class="section-badge">07 // LISTA CON VALIDACIÓN DE CONTEO</div>
+            <h2>Gestión de Lista con Contador Sincronizado</h2>
             <p class="description">
-                Construir interfaces dinámicas con listas que se pueden añadir, eliminar y editar es complicado sin un Modelo. En la versión acoplada, si intentas recuperar los elementos de la lista leyendo el DOM, cambios en el HTML pueden perder datos. Con el Modelo en memoria, cada elemento de la lista está sincronizado con su representación visual, permitiendo operaciones seguras como edición inline, eliminación y reordenamiento sin corrupción de datos.
+                Construir interfaces dinámicas con listas es complicado sin un Modelo. En la versión acoplada, al eliminar elementos muy rápido, el contador que lee el DOM puede desincronizarse con los elementos visuales reales, causando que números y lista no coincidan. Con el Modelo en memoria, cada adición y eliminación actualiza un array en memoria, y el contador siempre refleja la verdad: la longitud del array en el Modelo, no lo que ve en el DOM.
             </p>
             
             <div class="grid">
@@ -610,7 +625,11 @@ function renderizarS6() {
                         </div>
                         <div class="sandbox-action">
                             <button id="btnS7ClearCoupled" class="btn btn-secondary">Vaciar lista</button>
-                            <div class="payload-box">Elementos: <span id="countCoupled" class="code-inline">0</span></div>
+                            <div class="payload-box">Elementos en lista: <span id="countCoupled" class="code-inline">0</span></div>
+                            <div class="payload-box" style="margin-top: 8px; border: 1px solid var(--flat-red); background-color: rgba(185, 92, 80, 0.1); padding: 8px; border-radius: 4px;">
+                                <strong style="color: var(--flat-red);">⚠ Verificación:</strong> <span id="verifyCountCoupled" style="font-family: var(--font-mono); color: var(--flat-red);">0</span>
+                                <span id="verifyStatusCoupled" style="font-size: 0.75rem; color: var(--text-muted);"> — sincronizado</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -633,7 +652,11 @@ function renderizarS6() {
                         </div>
                         <div class="sandbox-action">
                             <button id="btnS7ClearMvc" class="btn btn-secondary">Vaciar lista</button>
-                            <div class="payload-box">Elementos: <span id="countMvc" class="code-inline">0</span></div>
+                            <div class="payload-box">Elementos en lista: <span id="countMvc" class="code-inline">0</span></div>
+                            <div class="payload-box" style="margin-top: 8px; border: 1px solid var(--flat-green); background-color: rgba(77, 124, 103, 0.1); padding: 8px; border-radius: 4px;">
+                                <strong style="color: var(--flat-green);">✓ Verificación:</strong> <span id="verifyCountMvc" style="font-family: var(--font-mono); color: var(--flat-green);">0</span>
+                                <span id="verifyStatusMvc" style="font-size: 0.75rem; color: var(--text-muted);"> — sincronizado</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -650,43 +673,35 @@ function renderizarS6() {
                     <div>
                         <div class="code-label">no-mvc.js</div>
                         <pre class="language-javascript"><code class="language-javascript">btnAddListCoupled.addEventListener("click", () => {
-    const texto = inputListCoupled.value;
-    if (!texto) return;
-    
-    // Añade directamente al DOM sin sincronización
+    // Añade al DOM sin estado sincronizado
     const li = document.createElement("li");
-    li.innerHTML = `${texto} 
-        &lt;button onclick="this.parentNode.remove()"&gt;×&lt;/button&gt;`;
+    li.innerHTML = `${texto} &lt;button&gt;×&lt;/button&gt;`;
     listContainerCoupled.appendChild(li);
     
-    // El contador se calcula leyendo el DOM cada vez
+    // El contador se calcula leyendo el DOM
     countCoupled.innerText = listContainerCoupled.children.length;
-    inputListCoupled.value = "";
+    verifyCountCoupled.innerText = listContainerCoupled.children.length;
+    
+    // Si eliminas rápido, el contador se desincroniza
 });</code></pre>
                     </div>
                     <div>
                         <div class="code-label">mvc.js</div>
                         <pre class="language-javascript"><code class="language-javascript">btnAddListMvc.addEventListener("click", () => {
-    const texto = inputListMvc.value;
-    if (!texto) return;
-    
-    // Añade primero al Modelo
+    // Primero al Modelo
     appState.s7.items.push({ id: Date.now(), text: texto });
+    
+    // La vista siempre refleja el Modelo
     renderizarListaMvc();
-    inputListMvc.value = "";
-});
-
-function renderizarListaMvc() {
-    listContainerMvc.innerHTML = appState.s7.items
-        .map(item => `&lt;li&gt;${item.text} 
-            &lt;button data-id="${item.id}"&gt;×&lt;/button&gt;&lt;/li&gt;`)
-        .join("");
+    
+    // El contador es siempre: appState.s7.items.length
     countMvc.innerText = appState.s7.items.length;
-}</code></pre>
+    verifyCountMvc.innerText = appState.s7.items.length;
+});</code></pre>
                     </div>
                 </div>
                 <div class="analysis-block">
-                    <p><strong>Explicación:</strong> Manipular directamente el DOM sin un Modelo centralizado causa problemas cuando necesitas realizar búsquedas, filtrados o ediciones. Cada operación requiere leer del DOM, lo que es frágil y propenso a errores. Con un Modelo, todas las operaciones son seguras y predecibles.</p>
+                    <p><strong>Explicación:</strong> Al eliminar elementos muy rápido en la versión acoplada, el contador que lee <code>listContainerCoupled.children.length</code> puede no coincidir con la cantidad real de clicks de eliminación, creando inconsistencias visuales. Con el Modelo centralizado en un array, el contador siempre es exacto: la longitud del array es la fuente de verdad, no el DOM.</p>
                 </div>
             </details>
         </section>

@@ -27,10 +27,20 @@ const btnS4ClearCoupled = document.getElementById("btnS4ClearCoupled");
 const totalDmgCoupled = document.getElementById("totalDmgCoupled");
 const dummySpriteCoupled = document.getElementById("dummySpriteCoupled");
 
+// Escenario 5: Hits rápidos
+const sliderS5Coupled = document.getElementById("sliderS5Coupled");
+const labelS5Coupled = document.getElementById("labelS5Coupled");
+const hitCountCoupled = document.getElementById("hitCountCoupled");
+const totalHitsCoupled = document.getElementById("totalHitsCoupled");
+const hitLogCoupled = document.getElementById("hitLogCoupled");
+const btnS5Coupled = document.getElementById("btnS5Coupled");
+const btnS5ClearCoupled = document.getElementById("btnS5ClearCoupled");
+
 // Escenario 6: Selector de colores
 const colorPickerCoupled = document.getElementById("colorPickerCoupled");
 const gradientBoxCoupled = document.getElementById("gradientBoxCoupled");
-const colorDisplayCoupled = document.getElementById("colorDisplayCoupled");
+const colorCountCoupled = document.getElementById("colorCountCoupled");
+const colorHistoryCoupled = document.getElementById("colorHistoryCoupled");
 const btnS6ResetCoupled = document.getElementById("btnS6ResetCoupled");
 
 // Escenario 7: Lista editable
@@ -39,6 +49,8 @@ const btnAddListCoupled = document.getElementById("btnAddListCoupled");
 const listContainerCoupled = document.getElementById("listContainerCoupled");
 const btnS7ClearCoupled = document.getElementById("btnS7ClearCoupled");
 const countCoupled = document.getElementById("countCoupled");
+const verifyCountCoupled = document.getElementById("verifyCountCoupled");
+const verifyStatusCoupled = document.getElementById("verifyStatusCoupled");
 
 const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
                      <input type="text" id="inputNombreCoupled" class="input" placeholder="Ej. Carlos Mendoza">`;
@@ -64,11 +76,19 @@ function reiniciarTodo() {
     totalDmgCoupled.innerText = "0";
     dummySpriteCoupled.innerText = "(*'-'*)";
     dummySpriteCoupled.style.color = "var(--text-dark)";
+    sliderS5Coupled.value = "1";
+    labelS5Coupled.innerText = "x1";
+    hitCountCoupled.innerText = "0";
+    totalHitsCoupled.innerText = "0";
+    hitLogCoupled.innerText = "—";
     colorPickerCoupled.value = "#ff6b6b";
     gradientBoxCoupled.style.background = "linear-gradient(135deg, #ff6b6b, #ffa500)";
-    colorDisplayCoupled.innerText = "#ff6b6b";
+    colorCountCoupled.innerText = "0";
+    colorHistoryCoupled.innerText = "—";
     listContainerCoupled.innerHTML = "";
     countCoupled.innerText = "0";
+    verifyCountCoupled.innerText = "0";
+    verifyStatusCoupled.innerText = " — sincronizado";
     inputListCoupled.value = "";
     irAPaso1();
 }
@@ -210,21 +230,63 @@ btnS4ClearCoupled.addEventListener("click", () => {
     telemetryLog.innerText = "[DOM] Muñeco de pruebas restablecido en el DOM. Marcador reseteado a 0.";
 });
 
+// Escenario 5: Hits rápidos (acoplado - sin sincronización)
+let hitLogCoupledData = [];
+
+sliderS5Coupled.addEventListener("input", (e) => {
+    const mult = parseInt(e.target.value);
+    labelS5Coupled.innerText = `x${mult}`;
+});
+
+btnS5Coupled.addEventListener("click", () => {
+    const mult = parseInt(sliderS5Coupled.value);
+    const damage = 10 * mult;
+    
+    // Lee del DOM (no-mvc)
+    let currentTotal = parseInt(totalHitsCoupled.innerText) || 0;
+    let currentCount = parseInt(hitCountCoupled.innerText) || 0;
+    
+    // Escribe directamente sin sincronización
+    totalHitsCoupled.innerText = currentTotal + damage;
+    hitCountCoupled.innerText = currentCount + 1;
+    
+    // El historial falla rápido
+    hitLogCoupledData.push(damage);
+    hitLogCoupled.innerText = hitLogCoupledData.join(" + ");
+    
+    telemetryLog.innerText = `[DOM] Golpe registrado (+${damage}). Total en pantalla: ${currentTotal + damage}. Golpes leídos: ${currentCount + 1}`;
+});
+
+btnS5ClearCoupled.addEventListener("click", () => {
+    hitCountCoupled.innerText = "0";
+    totalHitsCoupled.innerText = "0";
+    hitLogCoupled.innerText = "—";
+    hitLogCoupledData = [];
+    telemetryLog.innerText = "[DOM] Contador de golpes restablecido en el DOM.";
+});
+
 // Escenario 6: Selector de colores (acoplado)
+let colorHistoryCoupledData = [];
+
 colorPickerCoupled.addEventListener("change", (e) => {
     const color = e.target.value;
     const gradient = `linear-gradient(135deg, ${color}, #ffa500)`;
     gradientBoxCoupled.style.background = gradient;
-    colorDisplayCoupled.innerText = color;
-    telemetryLog.innerText = `[DOM] Gradiente modificado directamente en el DOM sin sincronización con estado externo.`;
+    
+    colorHistoryCoupledData.push(color);
+    colorHistoryCoupled.innerText = colorHistoryCoupledData.join(", ");
+    colorCountCoupled.innerText = colorHistoryCoupledData.length;
+    telemetryLog.innerText = `[DOM] Color modificado directamente en el DOM: ${color}`;
 });
 
 btnS6ResetCoupled.addEventListener("click", () => {
     colorPickerCoupled.value = "#ff6b6b";
     const gradient = "linear-gradient(135deg, #ff6b6b, #ffa500)";
     gradientBoxCoupled.style.background = gradient;
-    colorDisplayCoupled.innerText = "#ff6b6b";
-    telemetryLog.innerText = "[DOM] Gradiente restablecido a valor por defecto en el DOM.";
+    colorHistoryCoupled.innerText = "—";
+    colorCountCoupled.innerText = "0";
+    colorHistoryCoupledData = [];
+    telemetryLog.innerText = "[DOM] Historial y color restablecidos en el DOM.";
 });
 
 // Escenario 7: Lista editable (acoplada)
@@ -243,11 +305,14 @@ btnAddListCoupled.addEventListener("click", () => {
     deleteBtn.addEventListener("click", () => {
         li.remove();
         countCoupled.innerText = listContainerCoupled.children.length;
+        verifyCountCoupled.innerText = listContainerCoupled.children.length;
+        // Puede desincronizarse si hay muchos clicks rápidos
         telemetryLog.innerText = `[DOM] Elemento eliminado directamente del DOM. Total: ${listContainerCoupled.children.length}`;
     });
 
     listContainerCoupled.appendChild(li);
     countCoupled.innerText = listContainerCoupled.children.length;
+    verifyCountCoupled.innerText = listContainerCoupled.children.length;
     inputListCoupled.value = "";
     telemetryLog.innerText = `[DOM] Elemento añadido directamente al DOM. Total: ${listContainerCoupled.children.length}`;
 });
@@ -255,6 +320,8 @@ btnAddListCoupled.addEventListener("click", () => {
 btnS7ClearCoupled.addEventListener("click", () => {
     listContainerCoupled.innerHTML = "";
     countCoupled.innerText = "0";
+    verifyCountCoupled.innerText = "0";
+    verifyStatusCoupled.innerText = " — sincronizado";
     telemetryLog.innerText = "[DOM] Lista vaciada en el DOM.";
 });
 

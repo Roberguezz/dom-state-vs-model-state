@@ -25,10 +25,20 @@ const btnS4ClearMvc = document.getElementById("btnS4ClearMvc");
 const totalDmgMvc = document.getElementById("totalDmgMvc");
 const dummySpriteMvc = document.getElementById("dummySpriteMvc");
 
+// Escenario 5: Hits rápidos
+const sliderS5Mvc = document.getElementById("sliderS5Mvc");
+const labelS5Mvc = document.getElementById("labelS5Mvc");
+const hitCountMvc = document.getElementById("hitCountMvc");
+const totalHitsMvc = document.getElementById("totalHitsMvc");
+const hitLogMvc = document.getElementById("hitLogMvc");
+const btnS5Mvc = document.getElementById("btnS5Mvc");
+const btnS5ClearMvc = document.getElementById("btnS5ClearMvc");
+
 // Escenario 6: Selector de colores y gradientes
 const colorPickerMvc = document.getElementById("colorPickerMvc");
 const gradientBoxMvc = document.getElementById("gradientBoxMvc");
-const colorDisplayMvc = document.getElementById("colorDisplayMvc");
+const colorHistoryMvc = document.getElementById("colorHistoryMvc");
+const colorCountMvc = document.getElementById("colorCountMvc");
 const btnS6ResetMvc = document.getElementById("btnS6ResetMvc");
 
 // Escenario 7: Lista editable
@@ -37,6 +47,8 @@ const btnAddListMvc = document.getElementById("btnAddListMvc");
 const listContainerMvc = document.getElementById("listContainerMvc");
 const btnS7ClearMvc = document.getElementById("btnS7ClearMvc");
 const countMvc = document.getElementById("countMvc");
+const verifyCountMvc = document.getElementById("verifyCountMvc");
+const verifyStatusMvc = document.getElementById("verifyStatusMvc");
 
 const HTML_STEP_1 = `<label class="form-label">Nombre Completo del Usuario:</label>
                      <input type="text" id="inputNombreMvc" name="nombre" class="input" placeholder="Ej. Carlos Mendoza">`;
@@ -49,7 +61,8 @@ const appState = {
     s2: { saldoEuros: 0.0, divisa: "EUR" },
     s3: { pasoActual: 1, formulario: { nombre: "", telefono: "" } },
     s4: { damage: 0, lastHitTime: 0, isCombo: false },
-    s6: { color: "#6bcf7f" },
+    s5: { hitCount: 0, totalDamage: 0, hits: [] },
+    s6: { color: "#6bcf7f", colorHistory: [] },
     s7: { items: [] },
     tasas: { EUR: 1.0, USD: 1.10, JPY: 160.0 }
 };
@@ -59,7 +72,8 @@ function resetearEstructura() {
     appState.s2 = { saldoEuros: 0.0, divisa: "EUR" };
     appState.s3 = { pasoActual: 1, formulario: { nombre: "", telefono: "" } };
     appState.s4 = { damage: 0, lastHitTime: 0, isCombo: false };
-    appState.s6 = { color: "#6bcf7f" };
+    appState.s5 = { hitCount: 0, totalDamage: 0, hits: [] };
+    appState.s6 = { color: "#6bcf7f", colorHistory: [] };
     appState.s7 = { items: [] };
     selectS2Mvc.value = "EUR";
     wrapperMvc.style.width = "100px";
@@ -110,7 +124,13 @@ function renderizar() {
     // Escenario 6: Gradiente de color
     const gradient = `linear-gradient(135deg, ${appState.s6.color}, #4ec9b0)`;
     gradientBoxMvc.style.background = gradient;
-    colorDisplayMvc.innerText = appState.s6.color;
+    colorHistoryMvc.innerText = appState.s6.colorHistory.length === 0 ? "—" : appState.s6.colorHistory.join(", ");
+    colorCountMvc.innerText = appState.s6.colorHistory.length;
+
+    // Escenario 5: Hits rápidos
+    hitCountMvc.innerText = appState.s5.hitCount;
+    totalHitsMvc.innerText = appState.s5.totalDamage;
+    hitLogMvc.innerText = appState.s5.hits.length === 0 ? "—" : appState.s5.hits.join(" + ");
 
     // Escenario 7: Lista editable
     renderizarListaMvc();
@@ -118,9 +138,12 @@ function renderizar() {
 
 function renderizarListaMvc() {
     listContainerMvc.innerHTML = appState.s7.items
-        .map((item, index) => `<li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;"><span>${item.text}</span><button data-index="${index}" class="btn-delete-item" style="background: none; border: none; color: var(--flat-red); cursor: pointer; font-weight: bold; padding: 0 4px;">×</button></li>`)
+        .map((item, index) => `<li style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.9rem;"><span>${item.text}</span><button data-index="${index}" class="btn-delete-item" style="background: none; border: none; color: var(--flat-green); cursor: pointer; font-weight: bold; padding: 0 4px;">×</button></li>`)
         .join("");
     countMvc.innerText = appState.s7.items.length;
+    verifyCountMvc.innerText = appState.s7.items.length;
+    verifyStatusMvc.innerText = " — sincronizado";
+    verifyStatusMvc.style.color = "var(--text-muted)";
 
     // Añadir listeners a los botones de eliminar
     listContainerMvc.querySelectorAll(".btn-delete-item").forEach(btn => {
@@ -209,17 +232,45 @@ btnS4ClearMvc.addEventListener("click", () => {
     renderizar();
 });
 
+// Controladores del Escenario 5 (Hits rápidos)
+sliderS5Mvc.addEventListener("input", (e) => {
+    const mult = parseInt(e.target.value);
+    labelS5Mvc.innerText = `x${mult}`;
+});
+
+btnS5Mvc.addEventListener("click", () => {
+    const mult = parseInt(sliderS5Mvc.value);
+    const damage = 10 * mult;
+    
+    appState.s5.hitCount++;
+    appState.s5.totalDamage += damage;
+    appState.s5.hits.push(damage);
+    
+    telemetryLog.innerText = `[MVC] Golpe registrado (+${damage}). Total: ${appState.s5.totalDamage}. Golpes: ${appState.s5.hitCount}`;
+    renderizar();
+});
+
+btnS5ClearMvc.addEventListener("click", () => {
+    appState.s5.hitCount = 0;
+    appState.s5.totalDamage = 0;
+    appState.s5.hits = [];
+    telemetryLog.innerText = "[MVC] Contador de golpes restablecido en el Modelo.";
+    renderizar();
+});
+
 // Controladores del Escenario 6 (Selector de colores)
 colorPickerMvc.addEventListener("change", (e) => {
     appState.s6.color = e.target.value;
-    telemetryLog.innerText = `[MVC] Color seleccionado sincronizado en el Modelo: ${appState.s6.color}`;
+    appState.s6.colorHistory.push(e.target.value);
+    telemetryLog.innerText = `[MVC] Color sincronizado en el Modelo: ${appState.s6.color}. Historial: ${appState.s6.colorHistory.length} cambios`;
     renderizar();
 });
 
 btnS6ResetMvc.addEventListener("click", () => {
     appState.s6.color = "#6bcf7f";
+    appState.s6.colorHistory = [];
     colorPickerMvc.value = "#6bcf7f";
-    telemetryLog.innerText = "[MVC] Gradiente restablecido al color por defecto en el Modelo.";
+    telemetryLog.innerText = "[MVC] Historial y color restablecidos en el Modelo.";
     renderizar();
 });
 
